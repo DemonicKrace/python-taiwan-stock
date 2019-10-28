@@ -1,6 +1,7 @@
-analysis_report/
+venv/
 .idea/
 other/
+analysis_report/
 report/
 finanical_statement_report/report/
 finanical_statement_report/temp/
@@ -8,3 +9,5 @@ finanical_statement_report/temp/
 *.pyc
 *.xml
 test.py
+data_fetch/otc_info_list.csv
+data_fetch/twse_info_list.csv

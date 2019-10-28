@@ -31,7 +31,7 @@ ban_list = ["金融保險業", "建材營造業"]
 
 # 預計算之季別時間
 target_year = 2019
-target_season = 2
+target_season = 3
 
 # 欄位名稱
 data_row = [
@@ -564,13 +564,13 @@ def get_company_report_info_from_db(year, season):
 # 主程式
 def main():
     # 抓取此時刻最新公布之報表
-    # all_company_no = get_now_company_report_info()
+    all_company_no = get_now_company_report_info()
 
     # 使用暫存檔
     # all_company_no = get_data_from_temp(temp_dir + "/2018-08-13.txt")
 
     # 從資料庫抓取已儲存的資料
-    all_company_no = get_company_report_info_from_db(target_year, target_season)
+    # all_company_no = get_company_report_info_from_db(target_year, target_season)
 
     file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
 

@@ -7,14 +7,15 @@ Created on 2017/3/14 19:25
 
 import pymysql
 import datetime
+import config
 
 
 class MysqlManager:
-    def __init__(self, host="localhost", user="root", pw="", db="stock"):
-        self.host = host
-        self.user = user
-        self.pw = pw
-        self.db = db
+    def __init__(self, host="localhost", user="root", pw="root", db="stock"):
+        self.host = config.DB_HOST
+        self.user = config.DB_USER
+        self.pw = config.DB_PWD
+        self.db = config.DB_DEFAULT
 
     def sql_dml_query(self, sql_str):
         try:

@@ -323,7 +323,6 @@ def insert_stock_data_by_months(months):
             print("\n")
     print("twse stock data loading finish...")
 
-
     all_otc_stock_info = get_all_otc_stock_info_from_csv()
     print("otc stock data start loading...")
     n = 0
