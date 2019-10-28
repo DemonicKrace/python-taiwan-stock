@@ -1,0 +1,36 @@
+CREATE TABLE `warrant_info` (
+  `warrant_no` char(10) NOT NULL,
+  `type` char(5) NOT NULL,
+  `company_name` varchar(30) NOT NULL,
+  `company_abbr` varchar(30) NOT NULL,
+  `en_abbr` char(30) NOT NULL,
+  `open_date` date NOT NULL,
+  `final_date` date NOT NULL,
+  `finish_date` date NOT NULL,
+  `exercise_open_date` date NOT NULL,
+  `exercise_finish_date` date NOT NULL,
+  `circulation` int(11) NOT NULL,
+  `add_circulation` int(11) NOT NULL,
+  `target_no` char(30) NOT NULL,
+  `target_name` varchar(30) NOT NULL,
+  `twse` int(11) NOT NULL DEFAULT '0',
+  `otc` int(11) NOT NULL DEFAULT '0',
+  PRIMARY KEY (`warrant_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+權證代號	70001X
+權證類型	認購權證
+申請機構名稱	元大證券股份有限公司
+權證簡稱	臺銀金元大63展01
+權證英文簡稱	9901YT63X01
+上櫃/市日期	民國105年09月29日
+最後交易日	民國106年03月24日
+到期日	民國106年03月28日
+履約開始日   民國106年03月28日
+履約截止日   民國106年03月28日
+初次發行單位數量(仟單位)	20,000
+累計增額發行單位數量(仟單位)	0
+標的證券/指數代號 AU9901
+中/英文名稱 	臺銀金
+是否為上市   0
+是否為上櫃   1

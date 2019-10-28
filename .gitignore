@@ -1,0 +1,10 @@
+analysis_report/
+.idea/
+other/
+report/
+finanical_statement_report/report/
+finanical_statement_report/temp/
+.DS_Store
+*.pyc
+*.xml
+test.py
