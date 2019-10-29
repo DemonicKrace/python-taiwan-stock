@@ -25,6 +25,6 @@ class Log:
 
     def write_log(self, msg, filename):
         path = self.path + filename
-        d = datetime.datetime.now()
+        now = datetime.datetime.now()
         with open(path, "a") as f:
-            f.write("{}, {}\n".format(d, msg))
+            f.write("{}, {}\n".format(now, msg))
