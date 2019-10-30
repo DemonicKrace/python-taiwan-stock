@@ -2,6 +2,7 @@
 """
 Created on 2019/10/30 13:50
 
+此版本只計算當天最新發佈的財報
 @author: demonickrace
 """
 import os

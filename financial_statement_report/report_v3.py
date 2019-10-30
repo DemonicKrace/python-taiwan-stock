@@ -73,7 +73,6 @@ report_dir = "report"
 
 # 篩選條件
 """
-AND
 
 1. 近四季eps找不到，無條件通過
 
@@ -372,7 +371,7 @@ def create_csv(data, file_name):
     print("{}.csv was built...".format(file_name))
 
 
-# 暫存檔
+# 從暫存檔取得公司代號資訊
 def get_data_from_temp(filename):
     with open(filename) as f:
         content = f.readlines()
@@ -568,23 +567,7 @@ def main():
 
 
 if __name__ == '__main__':
-    #    string_process("10:27(公開發行公司)可取(4981)-10604-IFRSs會計師查核(核閱)報告")
-
-    #    n = get_net_cash_of_per_share(3259, 2018, 1)
-    #    print(n)
-    #    get_a_season_eps(2330, 2017, 3)
-
-    #    get_recent_4_season_eps_sum(2330, 2017, 3)
-    #    d = get_company_data(2330, 2017, 3)
-    #    print(d['BasicEarningsLossPerShare'])
-
-    #    print(is_balance_sheet_report_exist(2330, 2018, 1))
-    #    print(is_income_statement_report_exist(2330, 2018, 1))
-
-    # get_company_report_info_from_db(2018, 1)
-
     main()
-
     pass
 
 """
