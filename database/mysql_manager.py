@@ -330,6 +330,38 @@ class MysqlManager:
         finally:
             con.close()
 
+    def insert_all_stock_by_a_day(self, date, rows, table="stock"):
+        sql_insert = """INSERT INTO {}
+                        (stock_no,
+                         date,
+                         shares,
+                         turnover,
+                         open,
+                         high,
+                         low,
+                         close,
+                         bid_ask_spread,
+                         deal)
+                         VALUES
+                         ( %s,%s,%s,%s,%s,%s,%s,%s,%s,%s );""".format(table)
+        try:
+            con = pymysql.connect(self.host, self.user, self.pw, self.db)
+        except Exception as e:
+            print("database connect fail, error={}".format(e.message))
+            return None
+        try:
+            cursor = con.cursor()
+            affected_count = cursor.executemany(sql_insert, rows)
+            con.commit()
+            print("target date:{} inserted {} rows".format(date, affected_count))
+        except Exception as e:
+            msg = "target date:{} insert failed! ,error = {}\n".format(date, e.args)
+            print(msg)
+            self.write_error_log(msg)
+            con.rollback()
+        finally:
+            con.close()
+
     def insert_income_statement_to_db(self, stock_no, year, season, data, table="statement_of_comprehensive_income"):
         if data is None:
             err_msg = "insert_income_statement_to_db error:  stock_no = {}, year = {}, season = {}, input data is None!"\

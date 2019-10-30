@@ -4,6 +4,7 @@ Created on 2017/4/5 12:41
 
 @author: demonickrace
 """
+import config
 import csv
 import random
 import requests
@@ -18,11 +19,11 @@ dir_path = os.path.dirname(os.path.realpath(__file__)) + "/"
 otc_file = dir_path + "otc_info_list.csv"
 twse_file = dir_path + "twse_info_list.csv"
 
-max_retry_seconds = 12
-min_retry_seconds = 8
+max_retry_seconds = config.MAX_RETRY_SECONDS
+min_retry_seconds = config.MIN_RETRY_SECONDS
 
-max_wait_seconds = 20
-min_wait_seconds = 15
+max_wait_seconds = config.MAX_WAIT_SECONDS
+min_wait_seconds = config.MIN_WAIT_SECONDS
 
 
 # www.twse.com.tw，民國81年1月4號起開始提供股票資料
@@ -345,12 +346,113 @@ def insert_stock_data_by_months(months):
     print("otc stock data loading finish...")
 
 
+# 取得該日期的全部上市櫃股價資料
+def get_all_stock_by_a_day(date='2000-01-01'):
+    return get_all_twse_by_a_day(date) + get_all_otc_by_a_day(date)
+
+
+# 取得該日期的全部上市股價資料
+def get_all_twse_by_a_day(date='2000-01-01'):
+    url = config.TWSE_STOCK_BY_A_DAY_URL.format(date.replace('-', ''))
+    header = config.HEADER
+    result = []
+    try:
+        r = requests.get(url, headers=header, timeout=config.TIMEOUT_SECONDS)
+        data = r.json()
+        if 'data9' not in data:
+            return result
+        for row in data['data9']:
+            bid_ask_spread = ''
+            if '-' in row[9]:
+                bid_ask_spread = '-'
+            if '--' in row[5]:
+                row[5] = '0'
+                row[6] = '0'
+                row[7] = '0'
+                row[8] = '0'
+                row[10] = '0'
+            r = [
+                row[0],
+                date,
+                row[2].replace(',', ''),
+                row[4].replace(',', ''),
+                row[5].replace(',', ''),
+                row[6].replace(',', ''),
+                row[7].replace(',', ''),
+                row[8].replace(',', ''),
+                bid_ask_spread + row[10].replace(',', ''),
+                row[3].replace(',', '')
+            ]
+            result.append(r)
+    except Exception as e:
+        print(e.args)
+    return result
+
+
+# 取得該日期的全部上櫃股價資料
+def get_all_otc_by_a_day(date='2000-01-01'):
+    year = str(int(date.split('-')[0]) - 1911)
+    month = date.split('-')[1]
+    day = date.split('-')[2]
+    url = config.OTC_STOCK_BY_A_DAY_URL.format(year + '/' + month + '/' + day)
+    header = config.HEADER
+    result = []
+    try:
+        r = requests.get(url, headers=header, timeout=config.TIMEOUT_SECONDS)
+        data = r.json()
+        for row in data['aaData']:
+            if '--' in row[4]:
+                row[4] = '0'
+                row[5] = '0'
+                row[6] = '0'
+                row[2] = '0'
+                row[3] = '0'
+            r = [
+                row[0],
+                date,
+                row[7].replace(',', ''),
+                row[8].replace(',', ''),
+                row[4].replace(',', ''),
+                row[5].replace(',', ''),
+                row[6].replace(',', ''),
+                row[2].replace(',', ''),
+                row[3].replace(',', '').replace('+', ''),
+                row[9].replace(',', '')
+            ]
+            result.append(r)
+    except Exception as e:
+        print(e.args)
+    return result
+
+
+# 插入該日期全部上市櫃股價資料到資料庫
+def insert_all_stock_by_a_day(date='2000-01-01'):
+    data = get_all_stock_by_a_day(date)
+    manager.insert_all_stock_by_a_day(date, data)
+
+
+# 確認該日期的上市櫃股價資料是否存在
+def check_all_stock_exist_by_date(date='2000-01-01'):
+    sql = "SELECT stock_no FROM stock where date = '{}';".format(date)
+    result = manager.select_query(sql)
+    if len(result) > 0:
+        return True
+    return False
+
+
 if __name__ == '__main__':
-    stock_info_update()
 
-# 1235 2000 9 bid_ask_spread = "X0.00"
+    # get_all_twse_by_a_day('2019-10-29')
+    # get_all_otc_by_a_day('2019-10-29')
+    # print(get_all_stock_by_a_day('2019-10-27'))
+    # insert_all_stock_by_a_day('2019-10-29')
+    # print(check_all_stock_exist_by_date('2019-10-30'))
+    # stock_info_update()
 
+    # data = twse_fetch_a_month('2330', 2019, 10)
+    # print(data)
 
+    # 1235 2000 9 bid_ask_spread = "X0.00"
 
     # this_year = datetime.datetime.now().year
     # this_month = datetime.datetime.now().month
@@ -358,46 +460,9 @@ if __name__ == '__main__':
     # 對所有股票要爬取的月份
     # months = [[2017, 3], [2017, 4], [2017, 5], [2017, 6], [2017, 7], [2017, 8], [2017, 9], [2017, 10], [2017, 11],
     #          [2017, 12], [2018, 1], [2018, 2], [2018, 3], [2018, 4]]
-# months = [[2018, 3]]
-#     insert_stock_data_by_months(months)
+    # months = [[2018, 3]]
+    # insert_stock_data_by_months(months)
+
+    pass
 
 
-
-# 範例
-    """
-    print ("\ntwse_fetch_a_month\n")
-
-    data = twse_fetch_a_month(2330, 2018, 3)
-    if data is not None:
-        for row in data:
-            print(row)
-
-
-    print ("\n no format:\n")
-    data2 = twse_fetch_a_month(1235, 2000, 9)
-    if data2 is not None:
-        for row in data2:
-            print(row)
-    """
-    # otc_fetch
-    # 1258 102/12/12  1 19	--	--	--	--	0.00	1
-
-    # 1258 100 12 date = "XXX/XX/XX ＊"
-    # 1258 101 10 shares = "0"
-
-    # 範例
-    """
-    print ("\notc_fetch_a_month\n")
-    data = otc_fetch_a_month("8410", 2018, 3)
-    if data is not None:
-        for row in data:
-            print(row)
-
-    print ("\nno format:\n")
-
-
-    data2 = otc_fetch_a_month("1333", 2011, 10, data_format=False)
-    if data2 is not None:
-        for row in data2:
-            print(row)
-    """

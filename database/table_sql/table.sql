@@ -4,14 +4,15 @@ CREATE TABLE `stock` (
   `date` date NOT NULL,
   `shares` bigint(20) NOT NULL,
   `turnover` bigint(20) NOT NULL,
-  `open` float NOT NULL,
+  `open` float DEFAULT NULL,
   `high` float NOT NULL,
   `low` float NOT NULL,
   `close` float NOT NULL,
-  `bid_ask_spread` float NOT NULL,
+  `bid_ask_spread` varchar(10) NOT NULL COMMENT 'Ex-dividend date',
   `deal` int(11) NOT NULL,
   PRIMARY KEY (`stock_no`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
 
 -- stock_info
 CREATE TABLE `stock_info` (

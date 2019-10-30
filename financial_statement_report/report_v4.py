@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 """
-Created on 2018/4/26 13:38
+Created on 2019/10/30 13:50
 
-此版本只計算當天最新發佈的財報
 @author: demonickrace
 """
-import requests
-import time
+import os
 import csv
-from bs4 import BeautifulSoup
+import data_fetch.config
 from datetime import datetime
 from database import mysql_manager
-from data_fetch import finanical_statement_fetch
+from data_fetch import financial_statement_fetch
 from data_fetch import stock_fetch
 
 manager = mysql_manager.MysqlManager()
@@ -23,8 +21,8 @@ SHOW_MSG = True
 wait_seconds = 15
 
 # 目標日期
-target_date = datetime.today().strftime('%Y-%m-%d')
-# target_date = "2018-08-17"
+# target_date = datetime.today().strftime('%Y-%m-%d')
+target_date = "2019-10-30"
 
 # 過濾之產業
 ban_list = ["金融保險業", "建材營造業"]
@@ -35,19 +33,22 @@ target_season = 3
 
 # 欄位名稱
 data_row = [
-    ['股票代號', '公司名稱',
-     '{}收盤價'.format(target_date),
-     '近四季eps',
-     '近四季本益比',
-     "{}年第{}季eps".format(target_year, target_season),
-     "{}年第{}季eps".format(target_year - 1, target_season),
-     '{}年第{}季-{}年第{}季之eps成長率'.format(target_year, target_season, target_year - 1, target_season),
-     '修正後近四季本益比',
-     '{}年第{}季營業利益 (損失)(千元)'.format(target_year, target_season),
-     '{}年第{}季營業利益 (損失)(千元)'.format(target_year - 1, target_season),
-     '{}年第{}季-{}年第{}季營業利益 (損失)成長率'.format(target_year, target_season, target_year - 1, target_season),
-     '每股現金淨值',
-     '判斷訊息']]
+    [
+        '股票代號', '公司名稱',
+        '{}收盤價'.format(target_date),
+        '近四季eps',
+        '近四季本益比',
+        "{}年第{}季eps".format(target_year, target_season),
+        "{}年第{}季eps".format(target_year - 1, target_season),
+        '{}年第{}季-{}年第{}季之eps成長率'.format(target_year, target_season, target_year - 1, target_season),
+        '修正後近四季本益比',
+        '{}年第{}季營業利益 (損失)(千元)'.format(target_year, target_season),
+        '{}年第{}季營業利益 (損失)(千元)'.format(target_year - 1, target_season),
+        '{}年第{}季-{}年第{}季營業利益 (損失)成長率'.format(target_year, target_season, target_year - 1, target_season),
+        '每股現金淨值',
+        '判斷訊息'
+    ]
+]
 """
 [company_no, company_name,
 today_market_price,
@@ -65,85 +66,12 @@ msg]
 """
 
 # 對應資料夾名稱
-temp_dir = "temp"
+temp_dir = data_fetch.config.NEWEST_REPORT_INFO_SAVE_PATH
 report_dir = "report"
-
-
-# it will create_temp
-def get_now_company_report_info():
-    url = "https://mops.twse.com.tw/mops/web/t51sb10?Stp=R1"
-
-    header = {
-        'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0',
-        'Accept-Encoding': 'utf-8'
-    }
-
-    match_company_set = set()
-    try:
-        html = requests.get(url, headers=header, timeout=20)
-        soup = BeautifulSoup(html.content, "html.parser")
-
-        buttons = soup.findAll("button")
-        save_text = ""
-        for b in buttons:
-            msg = b.find("u").text
-            print(msg)
-            save_text += msg.encode('utf8') + "\n"
-            match_company_no = match_process(msg.encode('utf8'))
-            if match_company_no:
-                match_company_set.add(match_company_no)
-        #        print(match_company_set)
-        create_temp(save_text, target_date)
-
-    except Exception as e:
-        print("get_report_info error... ")
-        print(e.args)
-
-    return list(match_company_set)
-
-
-def match_process(msg_str):
-    match_str = ["上櫃公司", "上市公司"]
-    left_count = 0
-    right_count = 0
-
-    left_start_1 = 0
-    right_end_1 = 0
-
-    left_start_2 = 0
-    right_end_2 = 0
-
-    for i, c in enumerate(msg_str, 0):
-        if c is '(' and left_count == 0:
-            left_start_1 = i + 1
-            left_count += 1
-        elif c is ")" and right_count == 0:
-            right_end_1 = i
-            right_count += 1
-        elif c is "(" and left_count > 0:
-            left_start_2 = i + 1
-        elif c is ")" and right_count > 0:
-            right_end_2 = i
-            break
-
-    title = msg_str[left_start_1: right_end_1]
-    company_no = msg_str[left_start_2: right_end_2]
-    #    print(left_start_1, right_end_1)
-    #    print(left_start_2, right_end_2)
-    #    print("{}, {}\n".format(title, company_no))
-
-    match_word = "IFRSs"
-    if match_word in msg_str:
-        for tmp in match_str:
-            if title == tmp:
-                return company_no
-
-    return None
 
 
 # 篩選條件
 """
-AND
 
 1. 近四季eps找不到，無條件通過
 
@@ -180,45 +108,71 @@ def cal_qualification(stock_no, year, season,
                                                   this_season_net_income, pre_season_net_income,
                                                   net_cash_of_per_share))
 
+    # 必要資訊缺少，無條件不通過
+    if stock_no is None or year is None or season is None or today_market_price is None:
+        print("stock_no, year, season, today_market_price, this_year_eps someone is None")
+        return [False, "必要資訊缺少，無條件不通過"]
+
     # 近四季eps
     recent_4_season_eps_sum = get_recent_4_season_eps_sum(stock_no, year, season)
 
+    # 1. 近四季eps找不到，無條件通過
     if recent_4_season_eps_sum is None:
-        return [False, 'recent_4_season_eps_sum is None']
+        msg = "1. 近四季eps找不到，無條件通過"
+        print(msg)
+        return [True, msg]
 
     if today_market_price is not None and float(recent_4_season_eps_sum) > 0:
         # 近四季本益比
         recent_4_season_per = float(today_market_price) / float(recent_4_season_eps_sum)
 
+        # 2. 0 < 近四季本益比 <= 10
+        if 0 < recent_4_season_per <= 10:
+            msg = "2. 0 < 近四季本益比({}) <= 10".format(recent_4_season_per)
+            print(msg)
+            return [True, msg]
+
         # 3. 最近一季eps 與 去年同季esp 之成長率 >=  近四季本益比
-        if (this_season_eps is not None and pre_season_eps is not None and float(recent_4_season_per) > 0 and float(pre_season_eps) > 0)\
-            and (this_season_net_income is not None and pre_season_net_income is not None \
-                and float(pre_season_net_income) > 0 and float(recent_4_season_per) > 0)\
-            and (today_market_price is not None and net_cash_of_per_share is not None and float(net_cash_of_per_share) >= 0 \
-                and recent_4_season_eps_sum is not None and float(recent_4_season_eps_sum) > 0):
+        if this_season_eps is not None and pre_season_eps is not None and float(recent_4_season_per) > 0 \
+                and float(pre_season_eps) > 0:
             # 最近一季eps 與 去年同季esp 之成長率
             this_season_to_pre_season_eps_grow_rate = \
                 (float(this_season_eps) - float(pre_season_eps)) / float(pre_season_eps)
+            if this_season_to_pre_season_eps_grow_rate * 100 >= recent_4_season_per:
+                msg = "3. 最近一季eps 與 去年同季esp 之成長率({}%) >=  近四季本益比({})" \
+                    .format(this_season_to_pre_season_eps_grow_rate * 100, recent_4_season_per)
+                print(msg)
+                return [True, msg]
 
-            # 4. 最近一季[營業利益 (損失)] 與 去年同季[營業利益 (損失)] 之成長率(%) >= 近四季本益比
+        # 4. 最近一季[營業利益 (損失)] 與 去年同季[營業利益 (損失)] 之成長率(%) >= 近四季本益比
+        if this_season_net_income is not None and pre_season_net_income is not None \
+                and float(pre_season_net_income) > 0 and float(recent_4_season_per) > 0:
             # 最近一季[營業利益 (損失)] 與 去年同季[營業利益 (損失)] 之成長率
             this_season_to_pre_season_net_income_grow_rate = \
                 (float(this_season_net_income) - float(pre_season_net_income)) / float(pre_season_net_income)
-
-            # 6. 0 < 修正後近四季本益比 <= 10
-            # 修正後近四季本益比
-            amended_recent_4_season_per = (float(today_market_price) - float(net_cash_of_per_share)) \
-                                          / float(recent_4_season_eps_sum)
-
-            if 0 < recent_4_season_per <= 15 \
-                    and this_season_to_pre_season_eps_grow_rate >= 0.05 \
-                    and 0 < amended_recent_4_season_per <= 10 \
-                    and this_season_to_pre_season_net_income_grow_rate >= 0.05:
-                msg = "近四季本益比({}) <= ({}), 修正後近四季本益比({}) <= 10, 此季EPS對比上季成長率({}) >= 5%, 此季營收對比上季成長率({}) >= 5%"\
-                    .format(recent_4_season_per, 15, amended_recent_4_season_per, this_season_to_pre_season_eps_grow_rate,
-                            this_season_to_pre_season_net_income_grow_rate)
+            if this_season_to_pre_season_net_income_grow_rate * 100 >= recent_4_season_per:
+                msg = "4. 最近一季[營業利益 (損失)] 與 去年同季[營業利益 (損失)] 之成長率({}%) >= 近四季本益比({})" \
+                    .format(this_season_to_pre_season_net_income_grow_rate * 100, recent_4_season_per)
                 print(msg)
                 return [True, msg]
+
+    # 5. 最近一季每股現金淨值 >= 市價
+    if net_cash_of_per_share is not None and today_market_price is not None:
+        if float(net_cash_of_per_share) >= float(today_market_price):
+            msg = "5. 最近一季每股現金淨值({}) >= 市價({})".format(net_cash_of_per_share, today_market_price)
+            print(msg)
+            return [True, msg]
+
+    # 6. 0 < 修正後近四季本益比 <= 10
+    if today_market_price is not None and net_cash_of_per_share is not None and float(net_cash_of_per_share) >= 0 \
+            and recent_4_season_eps_sum is not None and float(recent_4_season_eps_sum) > 0:
+        # 修正後近四季本益比
+        amended_recent_4_season_per = (float(today_market_price) - float(net_cash_of_per_share)) \
+                                      / float(recent_4_season_eps_sum)
+        if 0 < amended_recent_4_season_per <= 10:
+            msg = "6. 0 < 修正後近四季本益比({}) <= 10".format(amended_recent_4_season_per)
+            print(msg)
+            return [True, msg]
 
     # 上述條件皆不符合
     # 7. 皆無條件符合，[不合格]
@@ -243,7 +197,7 @@ def get_net_cash_of_per_share(stock_no, year, season):
         # 嘗試再爬取一次
         print("get_net_cash_of_per_share, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(stock_no, year, season))
-        data = finanical_statement_fetch.balance_sheet_fetch_a_season(stock_no, year, season)
+        data = financial_statement_fetch.balance_sheet_fetch_a_season(stock_no, year, season)
         manager.insert_balance_sheet_to_db(stock_no, year, season, data)
         result = manager.select_query(sql)
         if len(result) == 0:
@@ -361,7 +315,7 @@ def get_a_season_eps(stock_no, year, season):
     try:
         # 缺資料則再爬取一次
         if len(result) == 0:
-            data = finanical_statement_fetch.income_statement_fetch_a_season(stock_no, year, season)
+            data = financial_statement_fetch.income_statement_fetch_a_season(stock_no, year, season)
             manager.insert_income_statement_to_db(stock_no, year, season, data)
             result = manager.select_query(sql_query)
             if len(result) > 0:
@@ -391,7 +345,7 @@ def get_company_data(company_no, year, season):
         # 嘗試再爬取一次
         print("get_company_data, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(company_no, year, season))
-        data = finanical_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+        data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
         manager.insert_income_statement_to_db(company_no, year, season, data)
         ci_result = manager.select_query(sql_query, True)
         if len(ci_result) > 0:
@@ -429,52 +383,7 @@ def get_price(stock_no, date):
     if len(result) == 1:
         return float(result[0][0])
     else:
-        #
-        insert_stock_data(stock_no, date)
-        return get_last_deal_date_price(stock_no)
-
-
-# 最後成交之收盤價
-def get_last_deal_date_price(stock_no):
-    sql_query = "select close from stock where stock_no = '{}' order by date desc;".format(stock_no)
-    result = manager.select_query(sql_query)
-    for price in result:
-        if float(price[0]) > 0:
-            return float(price[0])
-    return None
-
-
-# 插入某月股票價格資料
-def insert_stock_data(stock_no, date):
-    info_result = manager.select_query("SELECT twse, otc FROM stock.stock_info where stock_no = '{}';"
-                                       .format(stock_no), True)
-    twse = int(info_result[0]['twse'])
-    otc = int(info_result[0]['otc'])
-
-    year = datetime.strptime(date, '%Y-%m-%d').year
-    mon = datetime.strptime(date, '%Y-%m-%d').month
-
-    # print(year, mon)
-
-    data = None
-    if twse == 1:
-        data = stock_fetch.twse_fetch_a_month(stock_no, year, mon)
-    elif otc == 1:
-        data = stock_fetch.otc_fetch_a_month(stock_no, year, mon)
-
-    if data is not None:
-        month = date.split("-")[0] + "-" + date.split("-")[1]
-        manager.sql_dml_query("delete from stock where stock_no = '{}' and date like '{}%';"
-                              .format(stock_no, month))
-        manager.insert_stock(stock_no, data)
-
-    time.sleep(wait_seconds)
-
-    if data is not None:
-        # fetch success
-        return True
-    # fetch fail
-    return False
+        return None
 
 
 # 創建csv
@@ -487,15 +396,7 @@ def create_csv(data, file_name):
     print("{}.csv was built...".format(file_name))
 
 
-# 創建temp
-def create_temp(data, file_name):
-    target = "{}/{}.txt".format(temp_dir, file_name)
-    with open(target, 'w') as the_file:
-        the_file.write(data)
-    print("{}.txt was built...".format(file_name))
-
-
-# 暫存檔
+# 從暫存檔取得公司代號資訊
 def get_data_from_temp(filename):
     with open(filename) as f:
         content = f.readlines()
@@ -505,7 +406,7 @@ def get_data_from_temp(filename):
     match_company_set = set()
     for row in content:
         print(row)
-        match_company_no = match_process(row)
+        match_company_no = financial_statement_fetch.match_process(row)
         if match_company_no:
             match_company_set.add(match_company_no)
     data = list(match_company_set)
@@ -540,7 +441,7 @@ def get_company_report_info_from_db(year, season):
 # 主程式
 def main():
     # 抓取此時刻最新公布之報表
-    all_company_no = get_now_company_report_info()
+    all_company_no = financial_statement_fetch.get_newest_company_report_info()
 
     # 使用暫存檔
     # all_company_no = get_data_from_temp(temp_dir + "/2018-08-13.txt")
@@ -548,7 +449,10 @@ def main():
     # 從資料庫抓取已儲存的資料
     # all_company_no = get_company_report_info_from_db(target_year, target_season)
 
-    file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    file_name = os.path.basename(__file__).replace('.py', '') + datetime.now().strftime('_%Y-%m-%d_%H-%M-%S')
+
+    # 更新該日的全部上市櫃股價資料到資料庫
+    data_fetch.stock_fetch.insert_all_stock_by_a_day(target_date)
 
     # 公司名稱資訊
     all_stock_info = stock_fetch.get_all_stock_info_from_csv()
@@ -586,10 +490,10 @@ def main():
 
         # 確認新一季資料是否已存在
         if not is_income_statement_report_exist(company_no, year, season):
-            data = finanical_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+            data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
             manager.insert_income_statement_to_db(company_no, year, season, data)
         if not is_balance_sheet_report_exist(company_no, year, season):
-            data = finanical_statement_fetch.balance_sheet_fetch_a_season(company_no, year, season)
+            data = financial_statement_fetch.balance_sheet_fetch_a_season(company_no, year, season)
             manager.insert_balance_sheet_to_db(company_no, year, season, data)
 
         today_market_price = get_price(company_no, target_date)
@@ -688,25 +592,7 @@ def main():
 
 
 if __name__ == '__main__':
-    #    string_process("10:27(公開發行公司)可取(4981)-10604-IFRSs會計師查核(核閱)報告")
-
-    #    n = get_net_cash_of_per_share(3259, 2018, 1)
-    #    print(n)
-    #    get_a_season_eps(2330, 2017, 3)
-
-    #    get_recent_4_season_eps_sum(2330, 2017, 3)
-    #    d = get_company_data(2330, 2017, 3)
-    #    print(d['BasicEarningsLossPerShare'])
-
-    #    print(is_balance_sheet_report_exist(2330, 2018, 1))
-    #    print(is_income_statement_report_exist(2330, 2018, 1))
-
-    #    create_temp("test\ntest\n", "123.txt")
-
-    # get_company_report_info_from_db(2018, 1)
-
     main()
-
     pass
 
 """

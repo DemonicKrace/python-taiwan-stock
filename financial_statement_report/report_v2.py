@@ -5,13 +5,14 @@ Created on 2018/4/26 13:38
 此版本只計算當天最新發佈的財報
 @author: demonickrace
 """
+import os
 import requests
 import time
 import csv
 from bs4 import BeautifulSoup
 from datetime import datetime
 from database import mysql_manager
-from data_fetch import finanical_statement_fetch
+from data_fetch import financial_statement_fetch
 from data_fetch import stock_fetch
 
 manager = mysql_manager.MysqlManager()
@@ -267,7 +268,7 @@ def get_net_cash_of_per_share(stock_no, year, season):
         # 嘗試再爬取一次
         print("get_net_cash_of_per_share, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(stock_no, year, season))
-        data = finanical_statement_fetch.balance_sheet_fetch_a_season(stock_no, year, season)
+        data = financial_statement_fetch.balance_sheet_fetch_a_season(stock_no, year, season)
         manager.insert_balance_sheet_to_db(stock_no, year, season, data)
         result = manager.select_query(sql)
         if len(result) == 0:
@@ -385,7 +386,7 @@ def get_a_season_eps(stock_no, year, season):
     try:
         # 缺資料則再爬取一次
         if len(result) == 0:
-            data = finanical_statement_fetch.income_statement_fetch_a_season(stock_no, year, season)
+            data = financial_statement_fetch.income_statement_fetch_a_season(stock_no, year, season)
             manager.insert_income_statement_to_db(stock_no, year, season, data)
             result = manager.select_query(sql_query)
             if len(result) > 0:
@@ -415,7 +416,7 @@ def get_company_data(company_no, year, season):
         # 嘗試再爬取一次
         print("get_company_data, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(company_no, year, season))
-        data = finanical_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+        data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
         manager.insert_income_statement_to_db(company_no, year, season, data)
         ci_result = manager.select_query(sql_query, True)
         if len(ci_result) > 0:
@@ -572,7 +573,7 @@ def main():
     # 從資料庫抓取已儲存的資料
     # all_company_no = get_company_report_info_from_db(target_year, target_season)
 
-    file_name = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+    file_name = os.path.basename(__file__).replace('.py', '') + datetime.now().strftime('_%Y-%m-%d_%H-%M-%S')
 
     # 公司名稱資訊
     all_stock_info = stock_fetch.get_all_stock_info_from_csv()
@@ -610,10 +611,10 @@ def main():
 
         # 確認新一季資料是否已存在
         if not is_income_statement_report_exist(company_no, year, season):
-            data = finanical_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+            data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
             manager.insert_income_statement_to_db(company_no, year, season, data)
         if not is_balance_sheet_report_exist(company_no, year, season):
-            data = finanical_statement_fetch.balance_sheet_fetch_a_season(company_no, year, season)
+            data = financial_statement_fetch.balance_sheet_fetch_a_season(company_no, year, season)
             manager.insert_balance_sheet_to_db(company_no, year, season, data)
 
         today_market_price = get_price(company_no, target_date)

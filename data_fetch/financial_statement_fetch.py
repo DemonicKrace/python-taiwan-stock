@@ -4,7 +4,7 @@ Created on 2017/9/18 09:59
 
 @author: demonickrace
 """
-
+import config
 import time
 import requests
 import random
@@ -753,6 +753,7 @@ def get_stock_no_need_update_data(year, season):
     return data
 
 
+# 更新全部上市櫃資產負債和綜合損益財報
 def update_all(year, season):
     need_update_data = get_stock_no_need_update_data(year, season)
     i = 0
@@ -791,41 +792,109 @@ def update_all(year, season):
         print("\n")
 
 
+# 取得公開觀測站當天最新公布財報的公司代號
+def get_newest_company_report_info():
+    url = config.NEWEST_REPORT_INFO_URL
+    header = config.HEADER
+    match_company_set = set()
+    try:
+        html = requests.get(url, headers=header, timeout=config.TIMEOUT_SECONDS)
+        soup = BeautifulSoup(html.content, "html.parser")
+        buttons = soup.findAll("button")
+        save_text = ""
+        print('get data from {}'.format(url))
+        print('data start...')
+        for b in buttons:
+            msg = b.find("u").text
+            print(msg)
+            save_text += msg.encode('utf8') + "\n"
+            match_company_no = match_process(msg.encode('utf8'))
+            if match_company_no:
+                match_company_set.add(match_company_no)
+        print('data end...')
+        create_newest_company_report_info_temp(save_text, datetime.datetime.today().strftime('%Y-%m-%d'))
+
+    except Exception as e:
+        print("get_report_info error... ")
+        print(e.args)
+
+    return list(match_company_set)
+
+
+# 將公開觀測站當天最新公布財報的公司代號存入temp
+def create_newest_company_report_info_temp(data, file_name):
+    target = "{}/{}.txt".format(config.NEWEST_REPORT_INFO_SAVE_PATH, file_name)
+    with open(target, 'w') as the_file:
+        the_file.write(data)
+    print("{}.txt was built...".format(target))
+
+
+# 字串處理，過濾字串
+def match_process(msg_str):
+    match_str = ["上櫃公司", "上市公司"]
+    left_count = 0
+    right_count = 0
+
+    left_start_1 = 0
+    right_end_1 = 0
+
+    left_start_2 = 0
+    right_end_2 = 0
+
+    for i, c in enumerate(msg_str, 0):
+        if c is '(' and left_count == 0:
+            left_start_1 = i + 1
+            left_count += 1
+        elif c is ")" and right_count == 0:
+            right_end_1 = i
+            right_count += 1
+        elif c is "(" and left_count > 0:
+            left_start_2 = i + 1
+        elif c is ")" and right_count > 0:
+            right_end_2 = i
+            break
+    title = msg_str[left_start_1: right_end_1]
+    company_no = msg_str[left_start_2: right_end_2]
+    match_word = "IFRSs"
+    if match_word in msg_str:
+        for tmp in match_str:
+            if title == tmp:
+                return company_no
+    return None
+
+
 if __name__ == "__main__":
 
-#    print("start")
-#    update_all(2017, 4)
+    # print(get_newest_company_report_info())
 
-#    get_stockNo_need_update_data(2018, 1)
-
-    update_all(2019, 2)
-#    print(income_statement_fetch_a_season(2330, 2019, 2))
-#     d = income_statement_fetch_a_season("2392", 2019, 3)
-#     print(d)
-#   manager.insert_income_statement_to_db("5225", 2017, 5, d)
-
-#    insert_all()
+    # update_all(2019, 2)
+    # print(income_statement_fetch_a_season(2330, 2019, 2))
+    # d = income_statement_fetch_a_season("2392", 2019, 3)
+    # print(d)
+    # manager.insert_income_statement_to_db("5225", 2017, 5, d)
+    #
+    # insert_all()
 
     # (1201, 2013, 4) error
     # 多次request 有機率被拒絕訪問一段時間(至少超過數十秒，若無等候此時間，則會不斷被拒絕訪問)
-#   d = income_statement_fetch_a_season(1201, 2013, 4)
-#   from database import mysql_manager
-#   manager = mysql_manager.MysqlManager()
-#   manager.insert_income_statement_to_db(1201, 2013, 4, d)
+    # d = income_statement_fetch_a_season(1201, 2013, 4)
+    # from database import mysql_manager
+    # manager = mysql_manager.MysqlManager()
+    # manager.insert_income_statement_to_db(1201, 2013, 4, d)
 
+    # is_data = income_statement_fetch_a_season(2330, 106, 1)
+    # manager.insert_income_statement_to_db(2330, 106, 1, is_data)
+    #
+    # bs_data = balance_sheet_fetch_a_season(1436, 107, 1)
+    # manager.insert_balance_sheet_to_db(1436, 107, 1, bs_data)
+    #
+    # print(len(bs_data))
+    # for k, v in bs_data.items():
+    #     print(k, v)
+    #
+    # manager.insert_balance_sheet_to_db()
 
-#    is_data = income_statement_fetch_a_season(2330, 106, 1)
-#    manager.insert_income_statement_to_db(2330, 106, 1, is_data)
-
-#    bs_data = balance_sheet_fetch_a_season(1436, 107, 1)
-#    manager.insert_balance_sheet_to_db(1436, 107, 1, bs_data)
-
-#    print(len(bs_data))
-#    for k, v in bs_data.items():
-#        print(k, v)
-
-#    manager.insert_balance_sheet_to_db()
-
+    pass
 
 # 綜合損益 statement_of_comprehensive_income
 """
