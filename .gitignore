@@ -8,8 +8,8 @@ venv/
 other/
 analysis_report/
 report/
-financial_statement_report/report/
-financial_statement_report/temp/
+financial_statement_report/report/*
+financial_statement_report/temp/*
 test.py
 data_fetch/otc_info_list.csv
 data_fetch/twse_info_list.csv
