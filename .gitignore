@@ -1,8 +1,10 @@
 .DS_Store
 *.pyc
 *.xml
-venv/
+data_fetch/__pycache__/
+database/__pycache__/
 .idea/
+venv/
 other/
 analysis_report/
 report/
