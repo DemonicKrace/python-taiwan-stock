@@ -4,7 +4,7 @@
 - base on python 2.7 & mysql
 - crawl Taiwan financial data to local database which build yourself
 - basic Fundamental Analysis
-#### the project is keep ongoing and update irregular
+#### the project is keep ongoing and update irregularly
 
 
 
