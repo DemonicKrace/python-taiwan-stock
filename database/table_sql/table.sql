@@ -305,10 +305,10 @@ CREATE TABLE `month_revenue` (
   `pre_year_net_sales` bigint(20) NOT NULL COMMENT '前年同期營業淨收入',
   `increased_amount` bigint(20) NOT NULL COMMENT '增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
   `increased_amount_percent` float NOT NULL COMMENT '增減金額百分比 = 增減金額 / 前年同期營業淨收入',
-  `cumulative_amount` bigint(20) NOT NULL COMMENT '本年累計至當期之營業淨收總額',
-  `pre_year_cumulative_amount` bigint(20) NOT NULL COMMENT '前年累計至當期之營業淨收總額',
-  `cumulative_increased_amount` bigint(20) NOT NULL COMMENT '累計增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
-  `cumulative_increased_amount_percent` float NOT NULL COMMENT '累計增減金額百分比 = 累計增減金額 / 前年累計至當期之營業淨收總額',
+  `accumulated_amount` bigint(20) NOT NULL COMMENT '本年累計至當期之營業淨收總額',
+  `pre_year_accumulated_amount` bigint(20) NOT NULL COMMENT '前年累計至當期之營業淨收總額',
+  `accumulated_increased_amount` bigint(20) NOT NULL COMMENT '累計增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
+  `accumulated_increased_amount_percent` float NOT NULL COMMENT '累計增減金額百分比 = 累計增減金額 / 前年累計至當期之營業淨收總額',
   `note` text COMMENT '備註',
   PRIMARY KEY (`stock_no`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='台灣上市櫃月營收報表';

@@ -57,9 +57,9 @@ class MysqlManager:
             print(msg)
             self.write_error_log(msg)
             con.rollback()
-            return None
         finally:
             con.close()
+        return None
 
     def select_market_open_date(self, start_dt="", end_dt="", table="market_open_date"):
         if start_dt == "":
@@ -719,6 +719,39 @@ class MysqlManager:
         finally:
             con.close()
 
+    def insert_month_revenue_to_db(self, date, data=[], table="month_revenue"):
+        sql_insert = """INSERT INTO {}
+                                (stock_no,
+                                 date,
+                                 net_sales,
+                                 pre_year_net_sales,
+                                 increased_amount,
+                                 increased_amount_percent,
+                                 accumulated_amount,
+                                 pre_year_accumulated_amount,
+                                 accumulated_increased_amount,
+                                 accumulated_increased_amount_percent,
+                                 note)
+                                 VALUES
+                                 ( %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s);""".format(table)
+        try:
+            con = pymysql.connect(self.host, self.user, self.pw, self.db)
+        except Exception as e:
+            print("database connect fail, error={}".format(e.message))
+            return None
+        try:
+            cursor = con.cursor()
+            affected_count = cursor.executemany(sql_insert, data)
+            con.commit()
+            print("target date:{}, month_revenue inserted {} rows".format(date, affected_count))
+        except Exception as e:
+            msg = "target date:{}, month_revenue insert failed! ,error = {}\n".format(date, e.args)
+            print(msg)
+            self.write_error_log(msg)
+            con.rollback()
+        finally:
+            con.close()
+
     @staticmethod
     def write_error_log(msg):
         from data_fetch.log import Log
@@ -738,5 +771,5 @@ class MysqlManager:
 
 
 if __name__ == '__main__':
-    print("test")
-    # m = MysqlManager()
+
+    pass
