@@ -32,7 +32,7 @@ def download_twse(date='201909'):
                 os.rename(temp_file, new_file)
             print('{} was download.'.format(new_file))
     except Exception as e:
-        msg = 'download_twse error, msg = '.format(e.args)
+        msg = 'download_twse error, date = {}, msg = {}'.format(date, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -51,7 +51,7 @@ def download_otc(date='201909'):
             temp_xls_file.write(response.content)
             print('{} was download.'.format(xls_file))
     except Exception as e:
-        msg = 'download_otc error, msg = '.format(e.args)
+        msg = 'download_otc error, date = {}, msg = {}'.format(date, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -104,7 +104,7 @@ def get_twse_month_revenue(date='201909'):
                 twse_data.append(temp)
         return twse_data
     except Exception as e:
-        msg = 'get_twse_month_revenue error, msg = '.format(e.args)
+        msg = 'get_twse_month_revenue error, msg = {}'.format(e.args)
         print(msg)
     return None
 
@@ -161,7 +161,7 @@ def get_otc_month_revenue(date='201909'):
                     otc_data.append(temp)
         return otc_data
     except Exception as e:
-        msg = 'get_otc_month_revenue error, msg = '.format(e.args)
+        msg = 'get_otc_month_revenue error, msg = {}'.format(e.args)
         print(msg)
     return None
 
