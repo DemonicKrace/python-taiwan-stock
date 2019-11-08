@@ -9,15 +9,27 @@ import os
 MAX_RETRY_SECONDS = 12
 MIN_RETRY_SECONDS = 8
 
+# 每個request之間的等待時間
 MAX_WAIT_SECONDS = 20
 MIN_WAIT_SECONDS = 15
 
+# 單次request的最大timeout時間
 TIMEOUT_SECONDS = 20
 
 HEADER = {
     'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10.10; rv:39.0) Gecko/20100101 Firefox/39.0',
     'Accept-Encoding': 'utf-8'
 }
+
+"""
+filename
+"""
+# 上市證卷資訊csv暫存檔案檔名
+TWSE_INFO_FILENAME = 'twse_info_list.csv'
+
+# 上櫃證卷資訊csv暫存檔案檔名
+OTC_INFO_FILENAME = 'otc_info_list.csv'
+
 
 """
 directory path
@@ -51,3 +63,8 @@ TWSE_MONTH_REVENUE_URL = 'https://www.twse.com.tw/staticFiles/inspection/inspect
 # https://www.tpex.org.tw/storage/statistic/sales_revenue/O_201909.xls
 OTC_MONTH_REVENUE_URL = 'https://www.tpex.org.tw/storage/statistic/sales_revenue/{}'
 
+# 上市證卷資訊列表
+TWSE_STOCK_INFO_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=2'
+
+# 上櫃證卷資訊列表
+OTC_STOCK_INFO_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=4'

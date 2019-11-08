@@ -89,9 +89,8 @@ class MysqlManager:
         finally:
             con.close()
 
-    def insert_stock_info(self, rows, table="stock_info"):
-
-        if len(rows) == 0:
+    def insert_stock_info(self, data, table="stock_info"):
+        if len(data) == 0:
             print("{} , insert_stock_info, there is no data!".format(datetime.datetime.now()))
             return
 
@@ -99,11 +98,10 @@ class MysqlManager:
                         (`stock_no`,
                         `company_name`,
                         `date`,
-                        `type`,
-                        `twse`,
-                        `otc`)
+                        `business_type`,
+                        `market_type`)
                         VALUES
-                        (%s ,%s ,%s ,%s ,%s ,%s);""".format(table)
+                        (%s ,%s ,%s ,%s ,%s);""".format(table)
         try:
             con = pymysql.connect(self.host, self.user, self.pw, self.db)
         except Exception as e:
@@ -112,13 +110,9 @@ class MysqlManager:
         try:
             cursor = con.cursor()
             cursor.execute("SET NAMES utf8")
-            # clear old data
-            # cursor.execute("DELETE FROM {} WHERE 1=1".format(table))
-            affected_count = cursor.executemany(sql_insert, rows)
+            affected_count = cursor.executemany(sql_insert, data)
             con.commit()
             print("stock_info inserted {} rows".format(affected_count))
-            print("\n")
-        # except pymysql.IntegrityError as e:
         except Exception as e:
             msg = " stock_info insert failed! ,error = {}\n".format(e.message)
             print(msg)
@@ -330,7 +324,7 @@ class MysqlManager:
         finally:
             con.close()
 
-    def insert_all_stock_by_a_day(self, date, rows, table="stock"):
+    def insert_all_stock_price_by_a_day(self, date, rows, table="stock"):
         sql_insert = """INSERT INTO {}
                         (stock_no,
                          date,
@@ -719,7 +713,9 @@ class MysqlManager:
         finally:
             con.close()
 
-    def insert_month_revenue_to_db(self, date, data=[], table="month_revenue"):
+    def insert_month_revenue_to_db(self, date, data=None, table="month_revenue"):
+        if data is None:
+            data = []
         sql_insert = """INSERT INTO {}
                                 (stock_no,
                                  date,

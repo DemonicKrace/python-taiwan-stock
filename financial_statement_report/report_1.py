@@ -13,7 +13,7 @@ import os
 from os import listdir
 from database import mysql_manager
 manager = mysql_manager.MysqlManager()
-from data_fetch import stock_fetch
+from data_fetch import stock
 from datetime import datetime
 from data_fetch import log
 log = log.Log()
@@ -57,9 +57,9 @@ def insert_stock_data(stock_no, date):
 
     data = None
     if twse == 1:
-        data = stock_fetch.twse_fetch_a_month(stock_no, year, mon)
+        data = stock.twse_fetch_a_month(stock_no, year, mon)
     elif otc == 1:
-        data = stock_fetch.otc_fetch_a_month(stock_no, year, mon)
+        data = stock.otc_fetch_a_month(stock_no, year, mon)
 
     if data is not None:
         month = date.split("-")[0] + "-" + date.split("-")[1]
@@ -149,7 +149,7 @@ if __name__ == "__main__":
                 old_stockNo.extend(old_data)
 
     # 公司資訊
-    all_stock_info = stock_fetch.get_all_stock_info_from_csv()
+    all_stock_info = stock.get_all_stock_info_from_csv()
     all_stock_info_company_name = {}
     for row in all_stock_info:
         all_stock_info_company_name[row[0]] = row[1]

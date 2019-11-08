@@ -11,7 +11,7 @@ import data_fetch.config
 from datetime import datetime
 from database import mysql_manager
 from data_fetch import financial_statement_fetch
-from data_fetch import stock_fetch
+from data_fetch import stock
 
 manager = mysql_manager.MysqlManager()
 
@@ -427,10 +427,10 @@ def main():
     file_name = os.path.basename(__file__).replace('.py', '') + datetime.now().strftime('_%Y-%m-%d_%H-%M-%S')
 
     # 更新該日的全部上市櫃股價資料到資料庫
-    data_fetch.stock_fetch.insert_all_stock_by_a_day(target_date)
+    data_fetch.stock.insert_all_stock_by_a_day(target_date)
 
     # 公司名稱資訊
-    all_stock_info = stock_fetch.get_all_stock_info_from_csv()
+    all_stock_info = stock.get_all_stock_info_from_csv()
     all_stock_info_company_name = {}
     for row in all_stock_info:
         # [代號] = [公司名稱, 產業類別]

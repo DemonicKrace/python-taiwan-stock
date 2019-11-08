@@ -16,14 +16,14 @@ CREATE TABLE `stock` (
 
 -- stock_info
 CREATE TABLE `stock_info` (
-  `stock_no` char(10) NOT NULL,
-  `company_name` varchar(30) NOT NULL,
-  `date` date NOT NULL,
-  `type` varchar(20) NOT NULL,
-  `twse` int(11) NOT NULL DEFAULT '0',
-  `otc` int(11) NOT NULL DEFAULT '0',
+  `stock_no` char(10) NOT NULL COMMENT '公司股票代號',
+  `company_name` varchar(30) NOT NULL COMMENT '公司名稱',
+  `date` date NOT NULL COMMENT '上市櫃日期',
+  `business_type` varchar(20) NOT NULL COMMENT '主業類型',
+  `market_type` varchar(20) DEFAULT NULL COMMENT '上市櫃類型',
   PRIMARY KEY (`stock_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='證卷之公司資訊';
+
 
 -- warrant
 CREATE TABLE `warrant` (

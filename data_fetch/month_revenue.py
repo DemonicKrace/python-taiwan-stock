@@ -12,6 +12,8 @@ import data_fetch.config
 import data_fetch.log
 import database.mysql_manager
 
+db_manager = database.mysql_manager.MysqlManager()
+
 
 def download_twse(date='201909'):
     zip_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_twse.zip'.format(date)
@@ -170,22 +172,13 @@ def get_all_month_revenue(date='201909'):
     return get_twse_month_revenue(date) + get_otc_month_revenue(date)
 
 
-def update_month_revenue_to_db(dates=None):
-    if dates is None:
-        dates = []
-    db_manager = database.mysql_manager.MysqlManager()
-    for date in dates:
-        print('start update month_revenue, date={}'.format(date))
-        data = get_all_month_revenue(date)
-        db_manager.insert_month_revenue_to_db(date, data)
-
-
 def get_month_revenue_by_stockno_date(stock_no='2330', date='201909'):
     date = date[:4] + '-' + date[4:] + '-01'
     sql = "SELECT * FROM month_revenue WHERE stock_no = '{}' AND date = '{}';".format(stock_no, date)
-    db_manager = database.mysql_manager.MysqlManager()
     result = db_manager.select_query(sql, True)
-    return result[0]
+    if result:
+        return result[0]
+    return None
 
 
 if __name__ == '__main__':
@@ -215,7 +208,7 @@ if __name__ == '__main__':
     # update_month_revenue_to_db(dates)
 
     # import pprint
-    # d = get_month_revenue_by_stockno_date()
+    # d = get_month_revenue_by_stockno_date('2330', '201801')
     # pprint.pprint(d)
 
     pass

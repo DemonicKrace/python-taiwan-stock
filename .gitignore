@@ -16,3 +16,4 @@ data_fetch/fetch_err_log.txt
 data_fetch/month_revenue/*
 database/db_err_log.txt
 test.py
+task_list.txt

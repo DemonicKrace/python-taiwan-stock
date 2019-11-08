@@ -79,11 +79,11 @@ def get_stock(stock_no, year, month, twse=False, otc=False):
     # if failed , retry 5 times
     for i in range(0, times):
         try:
-            from data_fetch import stock_fetch
+            from data_fetch import stock
             if twse:
-                data = stock_fetch.twse_fetch_a_month(stock_no, year, month)
+                data = stock.twse_fetch_a_month(stock_no, year, month)
             elif otc:
-                data = stock_fetch.otc_fetch_a_month(stock_no, year, month)
+                data = stock.otc_fetch_a_month(stock_no, year, month)
             else:
                 return None
             return data

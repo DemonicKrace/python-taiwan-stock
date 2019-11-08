@@ -13,7 +13,7 @@ from bs4 import BeautifulSoup
 from datetime import datetime
 from database import mysql_manager
 from data_fetch import financial_statement_fetch
-from data_fetch import stock_fetch
+from data_fetch import stock
 
 manager = mysql_manager.MysqlManager()
 
@@ -483,9 +483,9 @@ def insert_stock_data(stock_no, date):
 
     data = None
     if twse == 1:
-        data = stock_fetch.twse_fetch_a_month(stock_no, year, mon)
+        data = stock.twse_fetch_a_month(stock_no, year, mon)
     elif otc == 1:
-        data = stock_fetch.otc_fetch_a_month(stock_no, year, mon)
+        data = stock.otc_fetch_a_month(stock_no, year, mon)
 
     if data is not None:
         month = date.split("-")[0] + "-" + date.split("-")[1]
@@ -576,7 +576,7 @@ def main():
     file_name = os.path.basename(__file__).replace('.py', '') + datetime.now().strftime('_%Y-%m-%d_%H-%M-%S')
 
     # 公司名稱資訊
-    all_stock_info = stock_fetch.get_all_stock_info_from_csv()
+    all_stock_info = stock.get_all_stock_info_from_csv()
     all_stock_info_company_name = {}
     for row in all_stock_info:
         # [代號] = [公司名稱, 產業類別]
