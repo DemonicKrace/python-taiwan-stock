@@ -89,11 +89,9 @@ class MysqlManager:
         finally:
             con.close()
 
-    def insert_stock_info(self, data, table="stock_info"):
-        if len(data) == 0:
-            print("{} , insert_stock_info, there is no data!".format(datetime.datetime.now()))
-            return
-
+    def insert_stock_info(self, data=None, table="stock_info"):
+        if data is None:
+            data = []
         sql_insert = """INSERT INTO {}
                         (`stock_no`,
                         `company_name`,

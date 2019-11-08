@@ -1,8 +1,0 @@
-
-TBD:
-
-1. stock.stock_info_update
-2. MysqlManager.insert_stock_info
-3. stock_info schema alter
-
-
