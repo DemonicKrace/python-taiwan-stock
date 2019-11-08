@@ -1,17 +1,18 @@
 -- stock
 CREATE TABLE `stock` (
-  `stock_no` char(10) NOT NULL,
-  `date` date NOT NULL,
-  `shares` bigint(20) NOT NULL,
-  `turnover` bigint(20) NOT NULL,
-  `open` float DEFAULT NULL,
-  `high` float NOT NULL,
-  `low` float NOT NULL,
-  `close` float NOT NULL,
-  `bid_ask_spread` varchar(10) NOT NULL COMMENT 'Ex-dividend date',
-  `deal` int(11) NOT NULL,
+  `stock_no` char(10) NOT NULL COMMENT '公司股票代號',
+  `date` date NOT NULL COMMENT '日期',
+  `shares` bigint(20) NOT NULL COMMENT '成交股數',
+  `turnover` bigint(20) NOT NULL COMMENT '成交金額',
+  `open` float NOT NULL COMMENT '開盤價',
+  `high` float NOT NULL COMMENT '最高價',
+  `low` float NOT NULL COMMENT '最低價',
+  `close` float NOT NULL COMMENT '收盤價',
+  `bid_ask_spread` varchar(10) NOT NULL COMMENT 'Ex-dividend date (價差)',
+  `deal` int(11) NOT NULL COMMENT '成交筆數',
   PRIMARY KEY (`stock_no`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='股價表';
+
 
 
 -- stock_info

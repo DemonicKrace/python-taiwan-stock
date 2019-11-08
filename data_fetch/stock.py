@@ -24,7 +24,7 @@ twse_info_file = current_dir_path + "/{}".format(data_fetch.config.OTC_INFO_FILE
 # www.tpex.org.tw，民國83年1月起開始提供股票股價資料
 
 """
-上市上櫃股票資訊 初始化/更新 創建csv 且 存入db
+上市上櫃股票資訊 - 官方資料格式
 
     [股票代號, 公司名稱, 上櫃/市日期,    產業別]
 ex: [   5209,    新鼎, 2002/02/25, 資訊服務業]
