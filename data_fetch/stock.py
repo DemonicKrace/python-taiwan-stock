@@ -31,6 +31,7 @@ ex: [   5209,    新鼎, 2002/02/25, 資訊服務業]
 """
 
 
+# 下載twse公司資訊為csv檔
 def download_twse_stock_info():
     try:
         header = data_fetch.config.HEADER
@@ -65,6 +66,7 @@ def download_twse_stock_info():
         log.write_fetch_err_log(msg)
 
 
+# 下載otc公司資訊為csv檔
 def download_otc_stock_info():
     try:
         header = data_fetch.config.HEADER
@@ -101,7 +103,9 @@ def download_otc_stock_info():
         log.write_fetch_err_log(msg)
 
 
-def get_stock_info_from_csv(file_type='twse'):
+# 由已下載的csv檔取得上市櫃公司資訊
+# file_type = 'all' | 'twse | 'otc'
+def get_stock_info_from_csv(file_type='all'):
     if 'twse' == file_type:
         info_file = twse_info_file
     elif 'otc' == file_type:
@@ -137,12 +141,6 @@ def get_stock_info_from_csv(file_type='twse'):
         log.write_fetch_err_log(msg)
 
     return []
-
-
-def stock_info_update():
-    data = get_stock_info_from_csv('all')
-    db_manager.sql_dml_query("TRUNCATE TABLE stock_info;")
-    db_manager.insert_stock_info(data)
 
 
 # 取得該日期的全部上市櫃股價資料
@@ -277,9 +275,6 @@ if __name__ == '__main__':
     # r = get_stock_info_from_csv('all')
     # pp.pprint(r)
     # print(len(r))
-
-    # # test stock_info_update
-    # stock_info_update()
 
     pass
 

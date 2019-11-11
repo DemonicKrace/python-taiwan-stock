@@ -6,6 +6,7 @@ Created on 2019/10/29 14:57
 """
 import os
 
+# 每次request的retry重傳間隔時間
 MAX_RETRY_SECONDS = 12
 MIN_RETRY_SECONDS = 8
 
