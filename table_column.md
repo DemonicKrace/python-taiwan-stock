@@ -1,7 +1,6 @@
+## 財務報表
 
-##財務報表
-
-###綜合損益表
+### 綜合損益表
 
 |            欄位          |           名稱          |
 --------------------------|-------------------------
@@ -41,18 +40,18 @@
 稀釋每股盈餘|
 　稀釋每股盈餘| diluted_earnings_loss_per_share
 
-####營業毛利（毛損）淨額
+#### 營業毛利（毛損）淨額
 - 營業毛利（毛損） ＋ 未實現銷貨（損）益 + 已實現銷貨（損）益
-####營業費用合計
+#### 營業費用合計
 - 推銷費用 + 管理費用 + 研究發展費用
-####營業外收入及支出合計
+#### 營業外收入及支出合計
 - 其他收入 + 其他利益及損失淨額 - 財務成本淨額 + 採用權益法認列之關聯企業及合資損益之份額淨額
 
 
 
-#Financial Statements
+# Financial Statements
 
-###Statement of Comprehensive Income
+### Statement of Comprehensive Income
 
 |            欄位          |           名稱          |
 --------------------------|-------------------------
@@ -92,9 +91,9 @@ BasicEarningsLossPerShare|
 DilutedEarningsLossPerShare|
 　DilutedEarningsLossPerShare| diluted_earnings_loss_per_share
 
-####GrossProfitLossFromOperationsNet
+#### GrossProfitLossFromOperationsNet
 - GrossProfitLossFromOperations ＋ UnrealizedProfitLossOnFromSales + RealizedProfitLossOnFromSales
-####OperatingExpenses
+#### OperatingExpenses
 - SellingExpenses + AdministrativeExpense + ResearchAndDevelopmentExpenses
-####NonoperatingIncomeAndExpenses
+#### NonoperatingIncomeAndExpenses
 - OtherIncomeOthers + OtherGainsLosses - FinanceCosts + ShareOfProfitLossOfAssociatesAndJointVenturesAccountedForUsingEquityMethod
