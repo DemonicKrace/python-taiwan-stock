@@ -13,6 +13,7 @@
 
 
 #Financial Statements
+
 ###Statement of Comprehensive Income
 |            欄位          |           名稱          |
 --------------------------|-------------------------
@@ -81,6 +82,7 @@ DilutedEarningsLossPerShare|
 
 
 ##財務報表
+
 ###綜合損益表
 |            欄位          |           名稱          |
 --------------------------|-------------------------
