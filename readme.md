@@ -88,10 +88,10 @@ DilutedEarningsLossPerShare|
 --------------------------|-------------------------
 營業收入合計 | operating_revenue
 營業成本合計 | operating_costs
-營業毛利（毛損）| gross_profit_loss_from_operations
-未實現銷貨（損）益| unrealized_profit_loss_from_sales
-已實現銷貨（損）益| realized_profit_loss_on_from_sales
-營業毛利（毛損）淨額| gross_profit_loss_from_operations_net
+營業毛利(毛損)| gross_profit_loss_from_operations
+未實現銷貨(損)益| unrealized_profit_loss_from_sales
+已實現銷貨(損)益| realized_profit_loss_on_from_sales
+營業毛利(毛損)淨額| gross_profit_loss_from_operations_net
 營業費用|
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;推銷費用| selling_expenses
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;管理費用| administrative_expense
@@ -99,30 +99,30 @@ DilutedEarningsLossPerShare|
 &nbsp;&nbsp;&nbsp;&nbsp;營業費用合計| operating_expenses
 其他收益及費損淨額|
 &nbsp;&nbsp;&nbsp;&nbsp;其他收益及費損淨額| net_other_income_expenses
-營業利益（損失）| net_operating_income_loss
+營業利益(損失)| net_operating_income_loss
 營業外收入及支出|
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其他收入| other_income_others
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;其他利益及損失淨額| other_gains_losses
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;財務成本淨額| finance_costs
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;採用權益法認列之關聯企業及合資損益之份額淨額| **other_income_c4**
 &nbsp;&nbsp;&nbsp;&nbsp;營業外收入及支出合計| nonoperating_income_and_expenses
-稅前淨利（淨損）| profit_loss_before_tax
-所得稅費用（利益）合計| income_tax_expense_continuing_operations
-繼續營業單位本期淨利（淨損）| profit_loss_from_continuing_operations
-本期淨利（淨損）| profit_loss
+稅前淨利(淨損)| profit_loss_before_tax
+所得稅費用(利益)合計| income_tax_expense_continuing_operations
+繼續營業單位本期淨利(淨損)| profit_loss_from_continuing_operations
+本期淨利(淨損)| profit_loss
 後續可能重分類至損益之項目|
-&nbsp;&nbsp;&nbsp;&nbsp;其他綜合損益（淨額）| other_comprehensive_income
+&nbsp;&nbsp;&nbsp;&nbsp;其他綜合損益(淨額)| other_comprehensive_income
 本期綜合損益總額| comprehensive_income
-&nbsp;&nbsp;&nbsp;&nbsp;母公司業主（淨利／損）| profit_loss_attributable_to_owners_of_parent
-&nbsp;&nbsp;&nbsp;&nbsp;非控制權益（淨利／損）| profit_loss_attributable_to_noncontrolling_interests
-&nbsp;&nbsp;&nbsp;&nbsp;母公司業主（綜合損益）| comprehensive_income_attributable_to_owners_of_parent
-&nbsp;&nbsp;&nbsp;&nbsp;非控制權益（綜合損益）| comprehensive_income_attributable_to_noncontrolling_interests
+&nbsp;&nbsp;&nbsp;&nbsp;母公司業主(淨利／損)| profit_loss_attributable_to_owners_of_parent
+&nbsp;&nbsp;&nbsp;&nbsp;非控制權益(淨利／損)| profit_loss_attributable_to_noncontrolling_interests
+&nbsp;&nbsp;&nbsp;&nbsp;母公司業主(綜合損益)| comprehensive_income_attributable_to_owners_of_parent
+&nbsp;&nbsp;&nbsp;&nbsp;非控制權益(綜合損益)| comprehensive_income_attributable_to_noncontrolling_interests
 基本每股盈餘|
 &nbsp;&nbsp;&nbsp;&nbsp;基本每股盈餘| basic_earnings_loss_per_share
 稀釋每股盈餘|
 &nbsp;&nbsp;&nbsp;&nbsp;稀釋每股盈餘| diluted_earnings_loss_per_share
-####營業毛利（毛損）淨額
-- 營業毛利（毛損） ＋ 未實現銷貨（損）益 + 已實現銷貨（損）益
+####營業毛利(毛損)淨額
+- 營業毛利(毛損) ＋ 未實現銷貨(損)益 + 已實現銷貨(損)益
 ####營業費用合計
 - 推銷費用 + 管理費用 + 研究發展費用
 ####營業外收入及支出合計
