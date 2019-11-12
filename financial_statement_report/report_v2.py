@@ -12,7 +12,7 @@ import csv
 from bs4 import BeautifulSoup
 from datetime import datetime
 from database import mysql_manager
-from data_fetch import financial_statement_fetch
+from data_fetch import financial_statement
 from data_fetch import stock
 
 manager = mysql_manager.MysqlManager()
@@ -268,7 +268,7 @@ def get_net_cash_of_per_share(stock_no, year, season):
         # 嘗試再爬取一次
         print("get_net_cash_of_per_share, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(stock_no, year, season))
-        data = financial_statement_fetch.balance_sheet_fetch_a_season(stock_no, year, season)
+        data = financial_statement.balance_sheet_fetch_a_season(stock_no, year, season)
         manager.insert_balance_sheet_to_db(stock_no, year, season, data)
         result = manager.select_query(sql)
         if len(result) == 0:
@@ -386,7 +386,7 @@ def get_a_season_eps(stock_no, year, season):
     try:
         # 缺資料則再爬取一次
         if len(result) == 0:
-            data = financial_statement_fetch.income_statement_fetch_a_season(stock_no, year, season)
+            data = financial_statement.income_statement_fetch_a_season(stock_no, year, season)
             manager.insert_income_statement_to_db(stock_no, year, season, data)
             result = manager.select_query(sql_query)
             if len(result) > 0:
@@ -416,7 +416,7 @@ def get_company_data(company_no, year, season):
         # 嘗試再爬取一次
         print("get_company_data, stock_no:{}, year:{}, season:{} is no data, try to get data again,".
               format(company_no, year, season))
-        data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+        data = financial_statement.income_statement_fetch_a_season(company_no, year, season)
         manager.insert_income_statement_to_db(company_no, year, season, data)
         ci_result = manager.select_query(sql_query, True)
         if len(ci_result) > 0:
@@ -611,10 +611,10 @@ def main():
 
         # 確認新一季資料是否已存在
         if not is_income_statement_report_exist(company_no, year, season):
-            data = financial_statement_fetch.income_statement_fetch_a_season(company_no, year, season)
+            data = financial_statement.income_statement_fetch_a_season(company_no, year, season)
             manager.insert_income_statement_to_db(company_no, year, season, data)
         if not is_balance_sheet_report_exist(company_no, year, season):
-            data = financial_statement_fetch.balance_sheet_fetch_a_season(company_no, year, season)
+            data = financial_statement.balance_sheet_fetch_a_season(company_no, year, season)
             manager.insert_balance_sheet_to_db(company_no, year, season, data)
 
         today_market_price = get_price(company_no, target_date)

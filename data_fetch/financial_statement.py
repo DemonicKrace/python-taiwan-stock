@@ -4,14 +4,15 @@ Created on 2017/9/18 09:59
 
 @author: demonickrace
 """
-import config
 import time
 import requests
 import random
 import csv
 import datetime
+import data_fetch.config
 from bs4 import BeautifulSoup
 from database import mysql_manager
+
 manager = mysql_manager.MysqlManager()
 
 income_statement_dict_s1 = None
@@ -794,11 +795,11 @@ def update_all(year, season):
 
 # 取得公開觀測站當天最新公布財報的公司代號
 def get_newest_company_report_info():
-    url = config.NEWEST_REPORT_INFO_URL
-    header = config.HEADER
+    url = data_fetch.config.NEWEST_REPORT_INFO_URL
+    header = data_fetch.config.HEADER
     match_company_set = set()
     try:
-        html = requests.get(url, headers=header, timeout=config.TIMEOUT_SECONDS)
+        html = requests.get(url, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
         soup = BeautifulSoup(html.content, "html.parser")
         buttons = soup.findAll("button")
         save_text = ""
@@ -823,7 +824,7 @@ def get_newest_company_report_info():
 
 # 將公開觀測站當天最新公布財報的公司代號存入temp
 def create_newest_company_report_info_temp(data, file_name):
-    target = "{}/{}.txt".format(config.NEWEST_REPORT_INFO_SAVE_PATH, file_name)
+    target = "{}/{}.txt".format(data_fetch.config.NEWEST_REPORT_INFO_SAVE_PATH, file_name)
     with open(target, 'w') as the_file:
         the_file.write(data)
     print("{}.txt was built...".format(target))
