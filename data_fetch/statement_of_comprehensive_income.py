@@ -310,6 +310,7 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
                 'basic_earnings_loss_per_share',
                 'diluted_earnings_loss_per_share',
                 'operating_revenue',
+                'operating_revenue_p',
                 'stock_no',
                 'year',
                 'season'
