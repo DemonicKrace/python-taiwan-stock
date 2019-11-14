@@ -10,6 +10,9 @@ import os
 MAX_RETRY_SECONDS = 12
 MIN_RETRY_SECONDS = 8
 
+# 同個request的最大retry次數
+MAX_RETRY_TIMES = 5
+
 # 每個request之間的等待時間
 MAX_WAIT_SECONDS = 20
 MIN_WAIT_SECONDS = 15
@@ -35,6 +38,12 @@ OTC_INFO_FILENAME = 'otc_info_list.csv'
 """
 directory path
 """
+# 四大財報暫存路徑
+FINANCIAL_STATEMENT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/financial_statement'
+
+# 綜合損益表暫存路徑
+FS_STATEMENT_OF_COMPREHENSIVE_INCOME_PATH = FINANCIAL_STATEMENT_PATH + '/statement_of_comprehensive_income'
+
 # 公開觀測站最新公開財報公司代號的暫存檔路徑
 NEWEST_REPORT_INFO_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../financial_statement_report/temp'
 
@@ -69,3 +78,8 @@ TWSE_STOCK_INFO_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=2'
 
 # 上櫃證卷資訊列表
 OTC_STOCK_INFO_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=4'
+
+# 公開資訊觀測站，綜合損益表
+# POST
+MOPS_STATEMENT_OF_COMPREHENSIVE_INCOME_URL = "https://mops.twse.com.tw/mops/web/ajax_t164sb04"
+

@@ -14,7 +14,6 @@ CREATE TABLE `stock` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='股價表';
 
 
-
 -- stock_info
 CREATE TABLE `stock_info` (
   `stock_no` char(10) NOT NULL COMMENT '公司股票代號',
@@ -63,6 +62,28 @@ CREATE TABLE `warrant_info` (
   `otc` int(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`warrant_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- market_open_date
+CREATE TABLE `market_open_date` (
+  `date` date NOT NULL COMMENT '開市日期，自1992-06-01起至2017-3\n\n上市股票自1992-6\n\n上櫃股票自1994-1\n\n上市上櫃權證自2008-1',
+  PRIMARY KEY (`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+-- month_revenue
+CREATE TABLE `month_revenue` (
+  `stock_no` char(10) NOT NULL COMMENT '公司股票代號',
+  `date` date NOT NULL COMMENT '本月營收之日期',
+  `net_sales` bigint(20) NOT NULL COMMENT '本月營業淨收入',
+  `pre_year_net_sales` bigint(20) NOT NULL COMMENT '前年同期營業淨收入',
+  `increased_amount` bigint(20) NOT NULL COMMENT '增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
+  `increased_amount_percent` float NOT NULL COMMENT '增減金額百分比 = 增減金額 / 前年同期營業淨收入',
+  `accumulated_amount` bigint(20) NOT NULL COMMENT '本年累計至當期之營業淨收總額',
+  `pre_year_accumulated_amount` bigint(20) NOT NULL COMMENT '前年累計至當期之營業淨收總額',
+  `accumulated_increased_amount` bigint(20) NOT NULL COMMENT '累計增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
+  `accumulated_increased_amount_percent` float NOT NULL COMMENT '累計增減金額百分比 = 累計增減金額 / 前年累計至當期之營業淨收總額',
+  `note` text COMMENT '備註',
+  PRIMARY KEY (`stock_no`,`date`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='台灣上市櫃月營收報表';
 
 -- Balance Sheet
 CREATE TABLE `balance_sheet` (
@@ -216,101 +237,66 @@ CREATE TABLE `balance_sheet` (
   PRIMARY KEY (`stock_no`,`year`,`season`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
--- Income Statement
+-- statement_of_comprehensive_income
 CREATE TABLE `statement_of_comprehensive_income` (
   `stock_no` char(10) NOT NULL,
   `year` int(11) NOT NULL,
   `season` int(11) NOT NULL,
-  `OperatingRevenue` int(11) DEFAULT NULL,
-  `OperatingRevenue_p` float DEFAULT NULL,
-  `OperatingCosts` int(11) DEFAULT NULL,
-  `OperatingCosts_p` float DEFAULT NULL,
-  `GrossProfitLossFromOperations` int(11) DEFAULT NULL,
-  `GrossProfitLossFromOperations_p` float DEFAULT NULL,
-  `UnrealizedProfitLossFromSales` int(11) DEFAULT NULL,
-  `UnrealizedProfitLossFromSales_p` float DEFAULT NULL,
-  `RealizedProfitLossOnFromSales` int(11) DEFAULT NULL,
-  `RealizedProfitLossOnFromSales_p` float DEFAULT NULL,
-  `GrossProfitLossFromOperationsNet` int(11) DEFAULT NULL,
-  `GrossProfitLossFromOperationsNet_p` float DEFAULT NULL,
-  `SellingExpenses` int(11) DEFAULT NULL,
-  `SellingExpenses_p` float DEFAULT NULL,
-  `AdministrativeExpense` int(11) DEFAULT NULL,
-  `AdministrativeExpense_p` float DEFAULT NULL,
-  `ResearchAndDevelopmentExpenses` int(11) DEFAULT NULL,
-  `ResearchAndDevelopmentExpenses_p` float DEFAULT NULL,
-  `OperatingExpenses` int(11) DEFAULT NULL,
-  `OperatingExpenses_p` float DEFAULT NULL,
-  `NetOtherIncomeExpenses` int(11) DEFAULT NULL,
-  `NetOtherIncomeExpenses_p` float DEFAULT NULL,
-  `NetOperatingIncomeLoss` int(11) DEFAULT NULL,
-  `NetOperatingIncomeLoss_p` float DEFAULT NULL,
-  `OtherIncomeOthers` int(11) DEFAULT NULL,
-  `OtherIncomeOthers_p` float DEFAULT NULL,
-  `OtherRevenue` int(11) DEFAULT NULL,
-  `OtherRevenue_p` float DEFAULT NULL,
-  `ForeignExchangeGains` int(11) DEFAULT NULL,
-  `ForeignExchangeGains_p` float DEFAULT NULL,
-  `OtherGainsLosses` int(11) DEFAULT NULL,
-  `OtherGainsLosses_p` float DEFAULT NULL,
-  `FinanceCosts` int(11) DEFAULT NULL,
-  `FinanceCosts_p` float DEFAULT NULL,
-  `Y1` int(11) DEFAULT NULL,
-  `Y1_p` float DEFAULT NULL,
-  `NonoperatingIncomeAndExpenses` int(11) DEFAULT NULL,
-  `NonoperatingIncomeAndExpenses_p` float DEFAULT NULL,
-  `ProfitLossBeforeTax` int(11) DEFAULT NULL,
-  `ProfitLossBeforeTax_p` float DEFAULT NULL,
-  `IncomeTaxExpenseContinuingOperations` int(11) DEFAULT NULL,
-  `IncomeTaxExpenseContinuingOperations_p` float DEFAULT NULL,
-  `ProfitLossFromContinuingOperations` int(11) DEFAULT NULL,
-  `ProfitLossFromContinuingOperations_p` float DEFAULT NULL,
-  `ProfitLoss` int(11) DEFAULT NULL,
-  `ProfitLoss_p` float DEFAULT NULL,
-  `Y3` int(11) DEFAULT NULL,
-  `Y3_p` float DEFAULT NULL,
-  `Y4` int(11) DEFAULT NULL,
-  `Y4_p` float DEFAULT NULL,
-  `Y2` int(11) DEFAULT NULL,
-  `Y2_p` float DEFAULT NULL,
-  `IncomeTaxRelatingToComponentsOfOtherComprehensiveIncome` int(11) DEFAULT NULL,
-  `IncomeTaxRelatingToComponentsOfOtherComprehensiveIncome_p` float DEFAULT NULL,
-  `OtherComprehensiveIncome` int(11) DEFAULT NULL,
-  `OtherComprehensiveIncome_p` float DEFAULT NULL,
-  `ComprehensiveIncome` int(11) DEFAULT NULL,
-  `ComprehensiveIncome_p` float DEFAULT NULL,
-  `ProfitLossAttributableToOwnersOfParent` int(11) DEFAULT NULL,
-  `ProfitLossAttributableToOwnersOfParent_p` float DEFAULT NULL,
-  `ProfitLossAttributableToNoncontrollingInterests` int(11) DEFAULT NULL,
-  `ProfitLossAttributableToNoncontrollingInterests_p` float DEFAULT NULL,
-  `ComprehensiveIncomeAttributableToOwnersOfParent` int(11) DEFAULT NULL,
-  `ComprehensiveIncomeAttributableToOwnersOfParent_p` float DEFAULT NULL,
-  `ComprehensiveIncomeAttributableToNoncontrollingInterests` int(11) DEFAULT NULL,
-  `ComprehensiveIncomeAttributableToNoncontrollingInterests_p` float DEFAULT NULL,
-  `BasicEarningsLossPerShare` float DEFAULT NULL,
-  `DilutedEarningsLossPerShare` float DEFAULT NULL,
+  `operating_revenue` bigint(20) DEFAULT NULL COMMENT '營業收入合計',
+  `operating_revenue_p` float DEFAULT NULL COMMENT '營業收入合計%',
+  `operating_costs` bigint(20) DEFAULT NULL COMMENT '營業成本合計',
+  `operating_costs_p` float DEFAULT NULL COMMENT '營業成本合計%',
+  `gross_profit_loss_from_operations` bigint(20) DEFAULT NULL COMMENT '營業毛利（毛損）',
+  `gross_profit_loss_from_operations_p` float DEFAULT NULL COMMENT '營業毛利（毛損）%',
+  `unrealized_profit_loss_from_sales` bigint(20) DEFAULT NULL COMMENT '未實現銷貨（損）益',
+  `unrealized_profit_loss_from_sales_p` float DEFAULT NULL COMMENT '未實現銷貨（損）益%',
+  `realized_profit_loss_on_from_sales` bigint(20) DEFAULT NULL COMMENT '已實現銷貨（損）益',
+  `realized_profit_loss_on_from_sales_p` float DEFAULT NULL COMMENT '已實現銷貨（損）益%',
+  `gross_profit_loss_from_operations_net` bigint(20) DEFAULT NULL COMMENT '營業毛利（毛損）淨額',
+  `gross_profit_loss_from_operations_net_p` float DEFAULT NULL COMMENT '營業毛利（毛損）淨額%',
+  `selling_expenses` bigint(20) DEFAULT NULL COMMENT '推銷費用',
+  `selling_expenses_p` float DEFAULT NULL COMMENT '推銷費用%',
+  `administrative_expense` bigint(20) DEFAULT NULL COMMENT '管理費用',
+  `administrative_expense_p` float DEFAULT NULL COMMENT '管理費用%',
+  `research_and_development_expenses` bigint(20) DEFAULT NULL COMMENT '研究發展費用',
+  `research_and_development_expenses_p` float DEFAULT NULL COMMENT '研究發展費用%',
+  `operating_expenses` bigint(20) DEFAULT NULL COMMENT '營業費用合計',
+  `operating_expenses_p` float DEFAULT NULL COMMENT '營業費用合計%',
+  `net_other_income_expenses` bigint(20) DEFAULT NULL COMMENT '其他收益及費損淨額',
+  `net_other_income_expenses_p` float DEFAULT NULL COMMENT '其他收益及費損淨額%',
+  `net_operating_income_loss` bigint(20) DEFAULT NULL COMMENT '營業利益（損失）',
+  `net_operating_income_loss_p` float DEFAULT NULL COMMENT '營業利益（損失）%',
+  `other_income_others` bigint(20) DEFAULT NULL COMMENT '其他收入',
+  `other_income_others_p` float DEFAULT NULL COMMENT '其他收入%',
+  `other_gains_losses` bigint(20) DEFAULT NULL COMMENT '其他利益及損失淨額',
+  `other_gains_losses_p` float DEFAULT NULL COMMENT '其他利益及損失淨額%',
+  `finance_costs` bigint(20) DEFAULT NULL COMMENT '財務成本淨額',
+  `finance_costs_p` float DEFAULT NULL COMMENT '財務成本淨額%',
+  `other_income_c4` bigint(20) DEFAULT NULL COMMENT '採用權益法認列之關聯企業及合資損益之份額淨額',
+  `other_income_c4_p` float DEFAULT NULL COMMENT '採用權益法認列之關聯企業及合資損益之份額淨額%',
+  `nonoperating_income_and_expenses` bigint(20) DEFAULT NULL COMMENT '營業外收入及支出合計',
+  `nonoperating_income_and_expenses_p` float DEFAULT NULL COMMENT '營業外收入及支出合計%',
+  `profit_loss_before_tax` bigint(20) DEFAULT NULL COMMENT '稅前淨利（淨損）',
+  `profit_loss_before_tax_p` float DEFAULT NULL COMMENT '稅前淨利（淨損）%',
+  `income_tax_expense_continuing_operations` bigint(20) DEFAULT NULL COMMENT '所得稅費用（利益）合計',
+  `income_tax_expense_continuing_operations_p` float DEFAULT NULL COMMENT '所得稅費用（利益）合計%',
+  `profit_loss_from_continuing_operations` bigint(20) DEFAULT NULL COMMENT '繼續營業單位本期淨利（淨損）',
+  `profit_loss_from_continuing_operations_p` float DEFAULT NULL COMMENT '繼續營業單位本期淨利（淨損）%',
+  `profit_loss` bigint(20) DEFAULT NULL COMMENT '本期淨利（淨損）',
+  `profit_loss_p` float DEFAULT NULL COMMENT '本期淨利（淨損）%',
+  `other_comprehensive_income` bigint(20) DEFAULT NULL COMMENT '其他綜合損益（淨額）',
+  `other_comprehensive_income_p` float DEFAULT NULL COMMENT '其他綜合損益（淨額）%',
+  `comprehensive_income` bigint(20) DEFAULT NULL COMMENT '本期綜合損益總額',
+  `comprehensive_income_p` float DEFAULT NULL COMMENT '本期綜合損益總額%',
+  `profit_loss_attributable_to_owners_of_parent` bigint(20) DEFAULT NULL COMMENT '母公司業主（淨利／損）',
+  `profit_loss_attributable_to_owners_of_parent_p` float DEFAULT NULL COMMENT '母公司業主（淨利／損）%',
+  `profit_loss_attributable_to_noncontrolling_interests` bigint(20) DEFAULT NULL COMMENT '非控制權益（淨利／損）',
+  `profit_loss_attributable_to_noncontrolling_interests_p` float DEFAULT NULL COMMENT '非控制權益（淨利／損）%',
+  `comprehensive_income_attributable_to_owners_of_parent` bigint(20) DEFAULT NULL COMMENT '母公司業主（綜合損益）',
+  `comprehensive_income_attributable_to_owners_of_parent_p` float DEFAULT NULL COMMENT '母公司業主（綜合損益）%',
+  `comprehensive_income_attributable_to_noncontrolling_interests` bigint(20) DEFAULT NULL COMMENT '非控制權益（綜合損益）',
+  `comprehensive_income_attributable_to_noncontrolling_interests_p` float DEFAULT NULL COMMENT '非控制權益（綜合損益）%',
+  `basic_earnings_loss_per_share` float DEFAULT NULL COMMENT '基本每股盈餘',
+  `diluted_earnings_loss_per_share` float DEFAULT NULL COMMENT '稀釋每股盈餘',
   PRIMARY KEY (`stock_no`,`year`,`season`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- market_open_date
-CREATE TABLE `market_open_date` (
-  `date` date NOT NULL COMMENT '開市日期，自1992-06-01起至2017-3\n\n上市股票自1992-6\n\n上櫃股票自1994-1\n\n上市上櫃權證自2008-1',
-  PRIMARY KEY (`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
--- month_revenue
-CREATE TABLE `month_revenue` (
-  `stock_no` char(10) NOT NULL COMMENT '公司股票代號',
-  `date` date NOT NULL COMMENT '本月營收之日期',
-  `net_sales` bigint(20) NOT NULL COMMENT '本月營業淨收入',
-  `pre_year_net_sales` bigint(20) NOT NULL COMMENT '前年同期營業淨收入',
-  `increased_amount` bigint(20) NOT NULL COMMENT '增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
-  `increased_amount_percent` float NOT NULL COMMENT '增減金額百分比 = 增減金額 / 前年同期營業淨收入',
-  `accumulated_amount` bigint(20) NOT NULL COMMENT '本年累計至當期之營業淨收總額',
-  `pre_year_accumulated_amount` bigint(20) NOT NULL COMMENT '前年累計至當期之營業淨收總額',
-  `accumulated_increased_amount` bigint(20) NOT NULL COMMENT '累計增減金額 = 本月營業淨收入 - 前年同期營業淨收入',
-  `accumulated_increased_amount_percent` float NOT NULL COMMENT '累計增減金額百分比 = 累計增減金額 / 前年累計至當期之營業淨收總額',
-  `note` text COMMENT '備註',
-  PRIMARY KEY (`stock_no`,`date`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='台灣上市櫃月營收報表';
-
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='綜合損益表';
