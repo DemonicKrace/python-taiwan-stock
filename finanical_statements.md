@@ -2,7 +2,7 @@
 
 ## Statement of Comprehensive Income
 
-|            欄位          |           名稱          |
+|      ColumnMeaning      |        ColumnName       |
 --------------------------|-------------------------
 OperatingRevenue | operating_revenue
 OperatingCosts | operating_costs

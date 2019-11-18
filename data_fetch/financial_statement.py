@@ -963,7 +963,7 @@ if __name__ == "__main__":
    遞延所得稅資產 DeferredTaxAssets
     其他非流動資產 OtherNoncurrentAssets
     非流動資產合計 (非流動資產合計) NoncurrentAssets
-資產總計
+資產總計 Assets
 流動負債
     短期借款 (短期借款合計) ShorttermBorrowings
     透過損益按公允價值衡量之金融負債-流動 (透過損益按公允價值衡量之金融負債－流動合計) CurrentFinancialLiabilitiesAtFairValueThroughProfitOrLoss

@@ -69,7 +69,7 @@ if __name__ == '__main__':
     # ]
     # update_stock_price_by_a_day(dates)
 
-    # # test stock_info_update
+    # test stock_info_update
     # stock_info_update()
 
     pass
