@@ -1,5 +1,3 @@
-# Financial Statements
-
 ## Statement of Comprehensive Income
 
 |      ColumnMeaning      |        ColumnName       |
@@ -49,8 +47,6 @@ DilutedEarningsLossPerShare|
 
 
 
-# 財務報表
-
 ## 綜合損益表
 
 |            欄位          |           名稱          |
@@ -97,4 +93,3 @@ DilutedEarningsLossPerShare|
 - 推銷費用 + 管理費用 + 研究發展費用
 ### 營業外收入及支出合計
 - 其他收入 + 其他利益及損失淨額 - 財務成本淨額 + 採用權益法認列之關聯企業及合資損益之份額淨額
-

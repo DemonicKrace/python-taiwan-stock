@@ -68,9 +68,9 @@ NumberOfSharesInEntityHeldByEntityAndByItsSubsidiaries| number_of_shares_in_enti
 --------------------------|-------------------------
 流動資產|
 　　現金及約當現金 or 現金及約當現金合計| cash_and_cash_equivalents
-　　透過損益按公允價值衡量之金融資產-流動| current_financial_assets_at_fair_value_through_profit_or_loss
-　　備供出售金融資產-流動淨額| current_available_for_sale_financial_assets
-　　持有至到期日金融資產-流動淨額| current_held_to_maturity_financial_assets
+　　透過損益按公允價值衡量之金融資產－流動| current_financial_assets_at_fair_value_through_profit_or_loss
+　　備供出售金融資產－流動淨額| current_available_for_sale_financial_assets
+　　持有至到期日金融資產－流動淨額| current_held_to_maturity_financial_assets
 　　應收帳款淨額| accounts_receivable_net
 　　存貨| inventories
 　　其他流動資產| other_current_assets
@@ -85,12 +85,12 @@ NumberOfSharesInEntityHeldByEntityAndByItsSubsidiaries| number_of_shares_in_enti
 資產總額| assets
 流動負債|
 　　短期借款 or 短期借款合計| shortterm_borrowings
-　　透過損益按公允價值衡量之金融負債-流動 or 透過損益按公允價值衡量之金融負債－流動合計| **current_liabilities_c2**
-　　避險之衍生金融負債-流動| current_derivative_financial_liabilities_for_hedging
+　　透過損益按公允價值衡量之金融負債－流動 or 透過損益按公允價值衡量之金融負債－流動合計| **current_liabilities_c2**
+　　避險之衍生金融負債－流動| current_derivative_financial_liabilities_for_hedging
 　　應付帳款| accounts_payable
 　　其他應付款 or 其他應付款合計| other_payables
 　　本期所得稅負債 or 當期所得稅負債| current_tax_liabilities
-　　負債準備-流動 or 負債準備－流動合計| current_provisions
+　　負債準備－流動 or 負債準備－流動合計| current_provisions
 　　其他流動負債 or 其他流動負債合計| other_current_liabilities
 　流動負債合計| current_liabilities
 非流動負債|
@@ -104,22 +104,22 @@ NumberOfSharesInEntityHeldByEntityAndByItsSubsidiaries| number_of_shares_in_enti
 　　　普通股股本| ordinary_share
 　　股本合計| capital_stock
 　資本公積|
-　　　資本公積-發行溢價| capital_surplus_additional_paid_in_capital
-　　　資本公積-認列對子公司所有權權益變動數| **capital_surplus_c2**
-　　　資本公積-受贈資產| capital_surplus_donated_assets_received
-　　　資本公積-採用權益法認列關聯企業及合資股權淨值之變動數| **capital_surplus_c4**
-　　　資本公積-合併溢額| capital_surplus_net_assets_from_merger
+　　　資本公積－發行溢價| capital_surplus_additional_paid_in_capital
+　　　資本公積－認列對子公司所有權權益變動數| **capital_surplus_c2**
+　　　資本公積－受贈資產| capital_surplus_donated_assets_received
+　　　資本公積－採用權益法認列關聯企業及合資股權淨值之變動數| **capital_surplus_c4**
+　　　資本公積－合併溢額| capital_surplus_net_assets_from_merger
 　　資本公積合計| capital_surplus
 　保留盈餘|
 　　　法定盈餘公積| legal_reserve
-　　　未分配盈餘(或待彌補虧損)| **retained_earnings_c2**
+　　　未分配盈餘（或待彌補虧損）| **retained_earnings_c2**
 　　保留盈餘合計| retained_earnings
 　其他權益|
 　　其他權益合計| other_equity_interest
 　歸屬於母公司業主之權益合計| equity_attributable_to_owners_of_parent
 　非控制權益| noncontrolling_interests
-權益總計 (權益總額	)| equity
-預收股款(權益項下)之約當發行股數(單位:股)| **balance_sheet_other_column_1**
-母公司暨子公司所持有之母公司庫藏股股數(單位:股)| **balance_sheet_other_column_2**
+權益總計 or 權益總額| equity
+預收股款（權益項下）之約當發行股數（單位：股）| **balance_sheet_other_column_1**
+母公司暨子公司所持有之母公司庫藏股股數（單位：股）| **balance_sheet_other_column_2**
 
 ### 其他
