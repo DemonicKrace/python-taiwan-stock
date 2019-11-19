@@ -13,8 +13,9 @@ financial_statement_report/temp/*
 data_fetch/otc_info_list.csv
 data_fetch/twse_info_list.csv
 data_fetch/fetch_err_log.txt
-data_fetch/month_revenue/*
 data_fetch/financial_statement/statement_of_comprehensive_income/*
+data_fetch/financial_statement/balance_sheet/*
+data_fetch/financial_statement/month_revenue/*
 database/db_err_log.txt
 test.py
 task_list.txt

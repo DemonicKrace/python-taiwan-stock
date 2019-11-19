@@ -4,7 +4,6 @@ Created on 2019/11/12 16:25
 
 @author: demonickrace
 """
-import os
 import json
 import time
 import requests
@@ -55,39 +54,6 @@ dict_format = {
 }
 
 
-# check temp exist
-def init_temp_file_if_not_exist(target_file):
-    if not os.path.exists(target_file):
-        with open(target_file, 'w') as temp_file:
-            temp_file.write(json.dumps({}, indent=4))
-            temp_file.close()
-
-
-# get json obj from temp
-def get_json_obj_from_temp_file(target_file):
-    with open(target_file) as temp_file:
-        json_obj = lib.tool.json_load_byteified(temp_file)
-        # json_obj = json.load(temp_file)
-        return json_obj
-
-
-# check data, set column default value if not exist
-def fill_default_value_if_column_not_exist(data=None):
-    global dict_format
-
-    if not data:
-        data = {}
-        print('fill_default_value_if_column_not_exist, input data in None')
-
-    for key, value in dict_format.items():
-        if value not in data:
-            data[value] = ''
-            if value not in ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']:
-                percent_key = value + '_p'
-                data[percent_key] = ''
-    return data
-
-
 def save_income_statement_of_a_season_to_temp(data=None):
     try:
         if not data:
@@ -97,8 +63,8 @@ def save_income_statement_of_a_season_to_temp(data=None):
         key = '{}-{}'.format(data['stock_no'], date)
         target_file = data_fetch.config.FS_STATEMENT_OF_COMPREHENSIVE_INCOME_PATH + '/{}.json'.format(date)
 
-        init_temp_file_if_not_exist(target_file)
-        json_obj = get_json_obj_from_temp_file(target_file)
+        lib.tool.init_json_file_if_not_exist(target_file)
+        json_obj = lib.tool.get_json_obj_from_temp_file(target_file)
 
         # check data exist
         with open(target_file, 'w') as temp_file:
@@ -120,8 +86,8 @@ def get_income_statement_of_a_season_from_temp(stock_no='2330', year=2019, seaso
         key = '{}-{}'.format(stock_no, date)
         target_file = data_fetch.config.FS_STATEMENT_OF_COMPREHENSIVE_INCOME_PATH + '/{}.json'.format(date)
 
-        init_temp_file_if_not_exist(target_file)
-        json_obj = get_json_obj_from_temp_file(target_file)
+        lib.tool.init_json_file_if_not_exist(target_file)
+        json_obj = lib.tool.get_json_obj_from_temp_file(target_file)
         result = json_obj.get(key, None)
         return result
     except Exception as e:
@@ -191,19 +157,22 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
         """
         html = requests.post(url, data=form_data, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
         soup = BeautifulSoup(html.content.decode("utf8"), "html.parser")
-        msg = None
-        info = soup.find("h4").find("font").text
-        if u"查無所需資料！" == info:
-            msg = "website find no data for the season!"
 
-        if msg:
+        if soup.find("h3"):
+            msg = "website is busy!"
+            print(msg)
+            raise Exception(msg)
+
+        h4 = soup.find("h4").find("font").text
+        if u"查無所需資料！" == h4:
+            msg = "website find no data for the season!"
             print(msg)
             raise Exception(msg)
 
         table = soup.find("table", "hasBorder")
         all_row = table.find_all("tr")
     except Exception as e:
-        msg = 'get_income_statement_of_a_season error, year_season = {}, msg = {}'.format(year_season, e.args)
+        msg = 'get_income_statement_from_url error, year_season = {}, msg = {}'.format(year_season, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -221,6 +190,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
             data.append(row)
 
     dict_data = {}
+    except_columns = ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']
     for row in data:
         row[0] = row[0].encode('utf8', 'ignore')
         row[1] = row[1].encode('utf8', 'ignore')
@@ -229,7 +199,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
             key = dict_format.get(row[0], None)
             key_p = key + "_p"
             if '' != row[1] and key:
-                if key in ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']:
+                if key in except_columns:
                     dict_data[key] = float(row[1])
                 else:
                     dict_data[key] = int(row[1]) * 1000
@@ -242,16 +212,15 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
     info = {'stock_no': stock_no, 'year': year, 'season': season}
     if dict_data:
         dict_data.update(info)
-
-    dict_data = fill_default_value_if_column_not_exist(dict_data)
-
-    # 儲存至temp
-    save_income_statement_of_a_season_to_temp(dict_data)
+        dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_columns)
+        # 儲存至temp
+        save_income_statement_of_a_season_to_temp(dict_data)
 
     return dict_data
 
 
 def get_income_statement_of_a_season4(stock_no='2330', year=2018):
+    global dict_format
     s1_data = get_income_statement_of_a_season_from_temp(stock_no, year, 1)
     s2_data = get_income_statement_of_a_season_from_temp(stock_no, year, 2)
     s3_data = get_income_statement_of_a_season_from_temp(stock_no, year, 3)
@@ -260,19 +229,19 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if not s1_data:
         s1_data = get_income_statement_from_url(stock_no, year, 1)
-        delay_seconds()
+        lib.tool.delay_seconds()()
 
     if not s2_data:
         s2_data = get_income_statement_from_url(stock_no, year, 2)
-        delay_seconds()
+        lib.tool.delay_seconds()()
 
     if not s3_data:
         s3_data = get_income_statement_from_url(stock_no, year, 3)
-        delay_seconds()
+        lib.tool.delay_seconds()()
 
     if not year_data:
         year_data = get_income_statement_from_url(stock_no, year, 4)
-        delay_seconds()
+        lib.tool.delay_seconds()()
 
     if s1_data and s2_data and s3_data and year_data:
         s4_data = {
@@ -303,18 +272,17 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
         s4_operating_revenue = s4_data['operating_revenue']
         s4_data['operating_revenue_p'] = 1.0
+        except_columns = ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']
         # calculate percent
         for key, value in s4_data.items():
-            # except columns
+            # columns with no percent
             if key in [
-                'basic_earnings_loss_per_share',
-                'diluted_earnings_loss_per_share',
                 'operating_revenue',
                 'operating_revenue_p',
                 'stock_no',
                 'year',
                 'season'
-            ]:
+            ] + except_columns:
                 continue
             percent_key = key + '_p'
             if '' == value:
@@ -322,7 +290,7 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
             else:
                 s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
 
-        s4_data = fill_default_value_if_column_not_exist(s4_data)
+        s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_columns)
         save_income_statement_of_a_season_to_temp(s4_data)
     return s4_data
 
@@ -345,12 +313,6 @@ def get_income_statement_of_a_season(stock_no='2330', year=2019, season=1):
     return result
 
 
-def delay_seconds():
-    seconds = random.randint(data_fetch.config.MIN_WAIT_SECONDS, data_fetch.config.MAX_WAIT_SECONDS)
-    print('wait {} seconds...\n'.format(seconds))
-    time.sleep(seconds)
-
-
 if __name__ == "__main__":
     import pprint as pp
 
@@ -364,7 +326,7 @@ if __name__ == "__main__":
     # r = save_income_statement_of_a_season_to_temp(d)
     # print(r)
 
-    # # test get_income_statement_of_a_season_from_url
+    # test get_income_statement_of_a_season_from_url
     # d = get_income_statement_of_a_season_from_url()
     # pp.pprint(d)
 
@@ -392,7 +354,7 @@ if __name__ == "__main__":
     #     s = d[1]
     #     r = get_income_statement_of_a_season('2330', y, s)
     #     pp.pprint(r)
-    #     delay_seconds()
+    #     lib.tool.delay_seconds()()
     # r = get_income_statement_from_url('2330', 2018, 4)
     # pp.pprint(r)
 

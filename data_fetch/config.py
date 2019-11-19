@@ -38,17 +38,20 @@ OTC_INFO_FILENAME = 'otc_info_list.csv'
 """
 directory path
 """
-# 四大財報暫存路徑
+# 財報暫存路徑
 FINANCIAL_STATEMENT_PATH = os.path.dirname(os.path.abspath(__file__)) + '/financial_statement'
 
 # 綜合損益表暫存路徑
 FS_STATEMENT_OF_COMPREHENSIVE_INCOME_PATH = FINANCIAL_STATEMENT_PATH + '/statement_of_comprehensive_income'
 
-# 公開觀測站最新公開財報公司代號的暫存檔路徑
-NEWEST_REPORT_INFO_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../financial_statement_report/temp'
+# 資產負債表暫存路徑
+FS_BALANCE_SHEET_PATH = FINANCIAL_STATEMENT_PATH + '/balance_sheet'
 
 # 上市櫃月營收檔案暫存路徑
-MONTH_REVENUE_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/month_revenue'
+FS_MONTH_REVENUE_PATH = FINANCIAL_STATEMENT_PATH + '/month_revenue'
+
+# 公開觀測站最新公開財報公司代號的暫存檔路徑
+NEWEST_REPORT_INFO_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../financial_statement_report/temp'
 
 
 """
@@ -83,3 +86,6 @@ OTC_STOCK_INFO_URL = 'https://isin.twse.com.tw/isin/C_public.jsp?strMode=4'
 # POST
 MOPS_STATEMENT_OF_COMPREHENSIVE_INCOME_URL = "https://mops.twse.com.tw/mops/web/ajax_t164sb04"
 
+# 公開資訊觀測站，資產負債表
+# POST
+MOPS_BALANCE_SHEET_URL = "https://mops.twse.com.tw/mops/web/ajax_t164sb03"

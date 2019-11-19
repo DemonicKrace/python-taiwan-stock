@@ -8,6 +8,7 @@ import os
 import requests
 import zipfile
 import xlrd
+import lib.tool
 import data_fetch.config
 import data_fetch.log
 import database.mysql_manager
@@ -16,7 +17,7 @@ db_manager = database.mysql_manager.MysqlManager()
 
 
 def download_twse(date='201909'):
-    zip_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_twse.zip'.format(date)
+    zip_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_twse.zip'.format(date)
     try:
         url = data_fetch.config.TWSE_MONTH_REVENUE_URL.format(date + '_C04003.zip')
         response = requests.get(url)
@@ -27,9 +28,9 @@ def download_twse(date='201909'):
 
         # extract zip and rename xls file
         with zipfile.ZipFile(zip_file, 'r') as zip_ref:
-            zip_ref.extractall(data_fetch.config.MONTH_REVENUE_SAVE_PATH)
-            temp_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}'.format(zip_ref.namelist()[0])
-            new_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_twse.xls'.format(date)
+            zip_ref.extractall(data_fetch.config.FS_MONTH_REVENUE_PATH)
+            temp_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}'.format(zip_ref.namelist()[0])
+            new_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_twse.xls'.format(date)
             if os.path.exists(temp_file):
                 os.rename(temp_file, new_file)
             print('{} was download.'.format(new_file))
@@ -45,7 +46,7 @@ def download_twse(date='201909'):
 
 
 def download_otc(date='201909'):
-    xls_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_otc.xls'.format(date)
+    xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_otc.xls'.format(date)
     try:
         url = data_fetch.config.OTC_MONTH_REVENUE_URL.format('O_' + date + '.xls')
         response = requests.get(url)
@@ -60,7 +61,7 @@ def download_otc(date='201909'):
 
 
 def get_twse_month_revenue(date='201909'):
-    twes_xls_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_twse.xls'.format(date)
+    twes_xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_twse.xls'.format(date)
     try:
         if not os.path.exists(twes_xls_file):
             download_twse(date)
@@ -112,7 +113,7 @@ def get_twse_month_revenue(date='201909'):
 
 
 def get_otc_month_revenue(date='201909'):
-    otc_xls_file = data_fetch.config.MONTH_REVENUE_SAVE_PATH + '/{}_otc.xls'.format(date)
+    otc_xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_otc.xls'.format(date)
     try:
         if not os.path.exists(otc_xls_file):
             download_otc(date)
@@ -169,10 +170,14 @@ def get_otc_month_revenue(date='201909'):
 
 
 def get_all_month_revenue(date='201909'):
-    return get_twse_month_revenue(date) + get_otc_month_revenue(date)
+    twse_data = get_twse_month_revenue(date)
+    lib.tool.delay_seconds()
+    otc_data = get_otc_month_revenue(date)
+    lib.tool.delay_seconds()
+    return twse_data + otc_data
 
 
-def get_month_revenue_by_stockno_date(stock_no='2330', date='201909'):
+def get_month_revenue_by_stockno_date_from_db(stock_no='2330', date='201909'):
     date = date[:4] + '-' + date[4:] + '-01'
     sql = "SELECT * FROM month_revenue WHERE stock_no = '{}' AND date = '{}';".format(stock_no, date)
     result = db_manager.select_query(sql, True)
@@ -200,15 +205,8 @@ if __name__ == '__main__':
     # for r in all:
     #     print(r)
 
-    # # db insert test
-    # dates = [
-    #     '201901',
-    #     '201909'
-    # ]
-    # update_month_revenue_to_db(dates)
-
     # import pprint
-    # d = get_month_revenue_by_stockno_date('2330', '201801')
+    # d = get_month_revenue_by_stockno_date_from_db('2330', '201801')
     # pprint.pprint(d)
 
     pass

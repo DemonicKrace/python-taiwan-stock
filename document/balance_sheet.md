@@ -81,7 +81,7 @@ NumberOfSharesInEntityHeldByEntityAndByItsSubsidiaries| number_of_shares_in_enti
 　　無形資產| intangible_assets
 　　遞延所得稅資產| deferred_tax_assets
 　　其他非流動資產| other_noncurrent_assets
-　非流動資產合計 or 非流動資產合計| noncurrent_assets
+　非流動資產合計| noncurrent_assets
 資產總額| assets
 流動負債|
 　　短期借款 or 短期借款合計| shortterm_borrowings

@@ -179,9 +179,7 @@ CREATE TABLE `balance_sheet` (
   `equity` bigint(20) DEFAULT NULL COMMENT '權益總計 or 權益總額',
   `equity_p` float DEFAULT NULL COMMENT '權益總計 or 權益總額%',
   `balance_sheet_other_column_1` bigint(20) DEFAULT NULL COMMENT '預收股款(權益項下)之約當發行股數(單位:股)',
-  `balance_sheet_other_column_1_p` float DEFAULT NULL COMMENT '預收股款(權益項下)之約當發行股數(單位:股)%',
   `balance_sheet_other_column_2` bigint(20) DEFAULT NULL,
-  `balance_sheet_other_column_2_p` float DEFAULT NULL COMMENT '母公司暨子公司所持有之母公司庫藏股股數(單位:股)%',
   PRIMARY KEY (`stock_no`,`year`,`season`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='資產負債表';
 
