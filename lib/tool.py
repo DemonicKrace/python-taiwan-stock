@@ -37,3 +37,18 @@ def _byteify(data, ignore_dicts = False):
         }
     # if it's anything else, return it in its original form
     return data
+
+
+#   full width to half width,（Ａ）=> (A)
+def full_to_half(s):
+    n = []
+    s = s.decode('utf-8')
+    for char in s:
+        num = ord(char)
+        if num == 0x3000:
+            num = 32
+        elif 0xFF01 <= num <= 0xFF5E:
+            num -= 0xfee0
+        num = unichr(num)
+        n.append(num)
+    return ''.join(n)

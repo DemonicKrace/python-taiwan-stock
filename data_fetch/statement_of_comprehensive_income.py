@@ -217,7 +217,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
                 if j > 3:
                     break
                 col = td.text.strip().encode("utf8").replace(",", "")
-                row.append(full_to_half(col))
+                row.append(lib.tool.full_to_half(col))
             data.append(row)
 
     dict_data = {}
@@ -349,21 +349,6 @@ def delay_seconds():
     seconds = random.randint(data_fetch.config.MIN_WAIT_SECONDS, data_fetch.config.MAX_WAIT_SECONDS)
     print('wait {} seconds...\n'.format(seconds))
     time.sleep(seconds)
-
-
-#   full width to half width,（Ａ）=> (A)
-def full_to_half(s):
-    n = []
-    s = s.decode('utf-8')
-    for char in s:
-        num = ord(char)
-        if num == 0x3000:
-            num = 32
-        elif 0xFF01 <= num <= 0xFF5E:
-            num -= 0xfee0
-        num = unichr(num)
-        n.append(num)
-    return ''.join(n)
 
 
 if __name__ == "__main__":
