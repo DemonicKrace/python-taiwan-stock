@@ -16,6 +16,7 @@ data_fetch/fetch_err_log.txt
 data_fetch/financial_statement/statement_of_comprehensive_income/*
 data_fetch/financial_statement/balance_sheet/*
 data_fetch/financial_statement/month_revenue/*
+data_fetch/financial_statement/newest_publish_info_temp/*
 database/db_err_log.txt
 test.py
 task_list.txt

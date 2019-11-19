@@ -5,9 +5,7 @@ Created on 2019/11/12 16:25
 @author: demonickrace
 """
 import json
-import time
 import requests
-import random
 import data_fetch.config
 import data_fetch.log
 import lib.tool

@@ -50,8 +50,8 @@ FS_BALANCE_SHEET_PATH = FINANCIAL_STATEMENT_PATH + '/balance_sheet'
 # 上市櫃月營收檔案暫存路徑
 FS_MONTH_REVENUE_PATH = FINANCIAL_STATEMENT_PATH + '/month_revenue'
 
-# 公開觀測站最新公開財報公司代號的暫存檔路徑
-NEWEST_REPORT_INFO_SAVE_PATH = os.path.dirname(os.path.abspath(__file__)) + '/../financial_statement_report/temp'
+# 公開觀測站最新發布財報之公司代號的暫存檔路徑
+NEWEST_REPORT_INFO_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/newest_publish_info_temp'
 
 
 """
