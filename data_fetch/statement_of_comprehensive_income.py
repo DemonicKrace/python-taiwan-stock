@@ -324,17 +324,21 @@ if __name__ == "__main__":
     # r = save_income_statement_of_a_season_to_temp(d)
     # print(r)
 
-    # test get_income_statement_of_a_season_from_url
+    # # test get_income_statement_of_a_season_from_url
     # d = get_income_statement_of_a_season_from_url()
     # pp.pprint(d)
 
-    # test get_income_statement_of_a_season_from_temp
+    # # test get_income_statement_of_a_season_from_temp
     # r = get_income_statement_of_a_season_from_temp()
     # pp.pprint(r)
 
     # test get_income_statement_of_a_season_from_url
     # s = get_income_statement_of_a_season_from_url('2330', 2018, 4)
     # pp.pprint(s)
+
+    # # test get_income_statement_of_a_season
+    # r = get_income_statement_of_a_season('2330', 2019, 1)
+    # pp.pprint(r)
 
     # test get_income_statement_of_a_season
     # date = [
