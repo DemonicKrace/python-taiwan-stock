@@ -11,12 +11,47 @@ import xlrd
 import lib.tool
 import data_fetch.config
 import data_fetch.log
+import database.config
 import database.mysql_manager
 
 db_manager = database.mysql_manager.MysqlManager()
 
+table_columns = [
+    "stock_no",
+    "date",
+    "net_sales",
+    "pre_year_net_sales",
+    "increased_amount",
+    "increased_amount_percent",
+    "accumulated_amount",
+    "pre_year_accumulated_amount",
+    "accumulated_increased_amount",
+    "accumulated_increased_amount_percent",
+    "note"
+]
 
-def download_twse(date='201909'):
+
+def is_month_revenue_exist_in_db(date='201909'):
+    date = date[:4] + '-' + date[4:] + '-01'
+    table = database.config.MONTH_REVENUE_TABLE
+    sql = "select * from {} where date='{}'".format(table, date)
+    result = db_manager.select_query(sql)
+    if result:
+        return True
+    return False
+
+
+def save_all_month_revenue_to_db(date='201909'):
+    global table_columns
+    inserted_rows = 0
+    rows = get_all_month_revenue_from_temp(date)
+    if not is_month_revenue_exist_in_db(date) and rows:
+        table_name = database.config.MONTH_REVENUE_TABLE
+        inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    return inserted_rows
+
+
+def download_twse_month_revenue(date='201909'):
     zip_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_twse.zip'.format(date)
     try:
         url = data_fetch.config.TWSE_MONTH_REVENUE_URL.format(date + '_C04003.zip')
@@ -35,7 +70,7 @@ def download_twse(date='201909'):
                 os.rename(temp_file, new_file)
             print('{} was download.'.format(new_file))
     except Exception as e:
-        msg = 'download_twse error, date = {}, msg = {}'.format(date, e.args)
+        msg = 'download_twse_month_revenue error, date = {}, msg = {}'.format(date, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -45,7 +80,7 @@ def download_twse(date='201909'):
             os.remove(zip_file)
 
 
-def download_otc(date='201909'):
+def download_otc_month_revenue(date='201909'):
     xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_otc.xls'.format(date)
     try:
         url = data_fetch.config.OTC_MONTH_REVENUE_URL.format('O_' + date + '.xls')
@@ -54,17 +89,18 @@ def download_otc(date='201909'):
             temp_xls_file.write(response.content)
             print('{} was download.'.format(xls_file))
     except Exception as e:
-        msg = 'download_otc error, date = {}, msg = {}'.format(date, e.args)
+        msg = 'download_otc_month_revenue error, date = {}, msg = {}'.format(date, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
 
 
-def get_twse_month_revenue(date='201909'):
+def get_twse_month_revenue_from_temp(date='201909'):
     twes_xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_twse.xls'.format(date)
     try:
         if not os.path.exists(twes_xls_file):
-            download_twse(date)
+            download_twse_month_revenue(date)
+            lib.tool.delay_seconds()
         workbook = xlrd.open_workbook(twes_xls_file)
         sheet = workbook.sheet_by_index(0)
         end_row = sheet.nrows
@@ -105,18 +141,19 @@ def get_twse_month_revenue(date='201909'):
                     ''
                 ]
                 twse_data.append(temp)
-        return twse_data
+        return lib.tool.byteify(twse_data)
     except Exception as e:
-        msg = 'get_twse_month_revenue error, msg = {}'.format(e.args)
+        msg = 'get_twse_month_revenue_from_temp error, msg = {}'.format(e.args)
         print(msg)
     return None
 
 
-def get_otc_month_revenue(date='201909'):
+def get_otc_month_revenue_from_temp(date='201909'):
     otc_xls_file = data_fetch.config.FS_MONTH_REVENUE_PATH + '/{}_otc.xls'.format(date)
     try:
         if not os.path.exists(otc_xls_file):
-            download_otc(date)
+            download_otc_month_revenue(date)
+            lib.tool.delay_seconds()
         workbook = xlrd.open_workbook(otc_xls_file)
         # otc has two sheets
         sheets = [
@@ -162,51 +199,106 @@ def get_otc_month_revenue(date='201909'):
                         ''
                     ]
                     otc_data.append(temp)
-        return otc_data
+        return lib.tool.byteify(otc_data)
     except Exception as e:
-        msg = 'get_otc_month_revenue error, msg = {}'.format(e.args)
+        msg = 'get_otc_month_revenue_from_temp error, msg = {}'.format(e.args)
         print(msg)
     return None
 
 
-def get_all_month_revenue(date='201909'):
-    twse_data = get_twse_month_revenue(date)
-    lib.tool.delay_seconds()
-    otc_data = get_otc_month_revenue(date)
-    lib.tool.delay_seconds()
-    return twse_data + otc_data
-
-
-def get_month_revenue_by_stockno_date_from_db(stock_no='2330', date='201909'):
+def get_all_month_revenue_from_db(date='201909', return_dict=False):
+    global table_columns
+    select_columns = table_columns
+    select_columns[1] = 'CAST(date AS CHAR) AS date'
+    columns_str = ', '.join(select_columns)
     date = date[:4] + '-' + date[4:] + '-01'
-    sql = "SELECT * FROM month_revenue WHERE stock_no = '{}' AND date = '{}';".format(stock_no, date)
-    result = db_manager.select_query(sql, True)
+    sql = "SELECT {} FROM month_revenue WHERE date = '{}';".format(columns_str, date)
+    result = db_manager.select_query(sql, return_dict)
     if result:
-        return result[0]
+        if return_dict:
+            return lib.tool.byteify(result)
+        else:
+            return [list(row) for row in result]
+    return None
+
+
+# crawl file via http if no temp data
+def get_all_month_revenue_from_temp(date='201909', return_dict=False):
+    global table_columns
+    twse_data = get_twse_month_revenue_from_temp(date)
+    otc_data = get_otc_month_revenue_from_temp(date)
+    all_data = twse_data + otc_data
+    if not return_dict:
+        return all_data
+
+    return_data = []
+    for row in all_data:
+        dict_data = {}
+        for index, key in enumerate(table_columns, 0):
+            dict_data[key] = row[index]
+        return_data.append(dict_data)
+    return return_data
+
+
+# from db
+def get_all_month_revenue(date='201909', return_dict=False):
+    return get_all_month_revenue_from_db(date, return_dict)
+
+
+# from db
+def get_month_revenue_by_stockno_date(stock_no='2330', date='201909', return_dict=False):
+    global table_columns
+    select_columns = table_columns
+    select_columns[1] = 'CAST(date AS CHAR) AS date'
+    columns_str = ', '.join(select_columns)
+    date = date[:4] + '-' + date[4:] + '-01'
+    sql = "SELECT {} FROM month_revenue WHERE stock_no = '{}' AND date = '{}';".format(columns_str, stock_no, date)
+    result = db_manager.select_query(sql, return_dict)
+    if result:
+        if return_dict:
+            return lib.tool.byteify(result[0])
+        else:
+            return list(result[0])
     return None
 
 
 if __name__ == '__main__':
-    # download_twse()
-    # download_otc()
+    import pprint as pp
 
-    # all_twse = get_twse_month_revenue()
-    # print(len(all_twse))
-    # for row in all_twse:
-    #     print(row)
+    # # test download_twse_month_revenue
+    # download_twse_month_revenue()
 
-    # all_otc = get_otc_month_revenue()
-    # print(len(all_otc))
-    # for row in all_otc:
-    #     print(row)
+    # # test download_otc_month_revenue
+    # download_otc_month_revenue()
 
-    # all = get_all_month_revenue()
-    # print(len(all))
-    # for r in all:
-    #     print(r)
+    # # test get_twse_month_revenue_from_temp
+    # r_twse = get_twse_month_revenue_from_temp()
+    # pp.pprint(r_twse)
 
-    # import pprint
-    # d = get_month_revenue_by_stockno_date_from_db('2330', '201801')
-    # pprint.pprint(d)
+    # # test get_otc_month_revenue_from_temp
+    # r_otc = get_otc_month_revenue_from_temp()
+    # pp.pprint(r_otc)
+
+    # # test get_all_month_revenue_from_temp
+    # r = get_all_month_revenue_from_temp('201909', True)
+    # pp.pprint(r)
+    # print(len(r))
+
+    # # get_month_revenue_by_stockno_date
+    # r = get_month_revenue_by_stockno_date('2330', '201909', True)
+    # pp.pprint(r)
+
+    # # test get_all_month_revenue_from_db
+    # r = get_all_month_revenue_from_db('201909')
+    # pp.pprint(r)
+    # print(len(r))
+
+    # # test is_month_revenue_exist_in_db
+    # r = is_month_revenue_exist_in_db('201901')
+    # pp.pprint(r)
+
+    # # test save_all_month_revenue_to_db
+    # inserted_count = save_all_month_revenue_to_db('201901')
+    # print(inserted_count)
 
     pass
