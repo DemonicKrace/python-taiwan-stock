@@ -51,6 +51,11 @@ dict_format = {
     "稀釋每股盈餘": "diluted_earnings_loss_per_share"
 }
 
+except_percent_columns = [
+    "basic_earnings_loss_per_share",
+    "diluted_earnings_loss_per_share"
+]
+
 
 def save_income_statement_of_a_season_to_temp(data=None):
     try:
@@ -98,6 +103,7 @@ def get_income_statement_of_a_season_from_temp(stock_no='2330', year=2019, seaso
 
 def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
     global dict_format
+    global except_percent_columns
     year_season = "{}-{}".format(year, season)    
     try:
         query_year = year
@@ -188,7 +194,6 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
             data.append(row)
 
     dict_data = {}
-    except_columns = ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']
     for row in data:
         row[0] = row[0].encode('utf8', 'ignore')
         row[1] = row[1].encode('utf8', 'ignore')
@@ -197,7 +202,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
             key = dict_format.get(row[0], None)
             key_p = key + "_p"
             if '' != row[1] and key:
-                if key in except_columns:
+                if key in except_percent_columns:
                     dict_data[key] = float(row[1])
                 else:
                     dict_data[key] = int(row[1]) * 1000
@@ -210,7 +215,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
     info = {'stock_no': stock_no, 'year': year, 'season': season}
     if dict_data:
         dict_data.update(info)
-        dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_columns)
+        dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_percent_columns)
         # 儲存至temp
         save_income_statement_of_a_season_to_temp(dict_data)
 
@@ -219,6 +224,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
 
 def get_income_statement_of_a_season4(stock_no='2330', year=2018):
     global dict_format
+    global except_percent_columns
     s1_data = get_income_statement_of_a_season_from_temp(stock_no, year, 1)
     s2_data = get_income_statement_of_a_season_from_temp(stock_no, year, 2)
     s3_data = get_income_statement_of_a_season_from_temp(stock_no, year, 3)
@@ -270,17 +276,16 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
         s4_operating_revenue = s4_data['operating_revenue']
         s4_data['operating_revenue_p'] = 1.0
-        except_columns = ['basic_earnings_loss_per_share', 'diluted_earnings_loss_per_share']
         # calculate percent
         for key, value in s4_data.items():
-            # columns with no percent
+            # columns with not need percent
             if key in [
                 'operating_revenue',
                 'operating_revenue_p',
                 'stock_no',
                 'year',
                 'season'
-            ] + except_columns:
+            ] + except_percent_columns:
                 continue
             percent_key = key + '_p'
             if '' == value:
@@ -288,7 +293,7 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
             else:
                 s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
 
-        s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_columns)
+        s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
         save_income_statement_of_a_season_to_temp(s4_data)
     return s4_data
 

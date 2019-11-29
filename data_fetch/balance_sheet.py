@@ -9,7 +9,11 @@ import requests
 import data_fetch.config
 import data_fetch.log
 import lib.tool
+import database.config
 from bs4 import BeautifulSoup
+import database.mysql_manager
+
+db_manager = database.mysql_manager.MysqlManager()
 
 dict_format = {
     # 流動資產
@@ -84,14 +88,66 @@ dict_format = {
     "母公司暨子公司所持有之母公司庫藏股股數(單位:股)": "balance_sheet_other_column_2",
 }
 
+except_percent_columns = [
+    "balance_sheet_other_column_1",
+    "balance_sheet_other_column_2"
+]
+
+
+def is_balance_sheet_exist_in_db(stock_no='2330', year=2019, season=1):
+    table = database.config.BALANCE_SHEET_TABLE
+    sql = "select * from {} where stock_no='{}' and year='{}' and season='{}'".format(table, stock_no, year, season)
+    result = db_manager.select_query(sql)
+    if result:
+        return True
+    return False
+
+
+def update_balance_sheet_of_a_season_to_db(stock_no='2330', year=2019, season=1):
+    inserted_rows = 0
+    return_data = get_balance_sheet_of_a_season(stock_no, year, season)
+    if not is_balance_sheet_exist_in_db(stock_no, year, season) and return_data:
+        table_columns = []
+        row = []
+        for key, value in return_data.iteritems():
+            if '' != value:
+                table_columns.append(key)
+                row.append(value)
+        rows = [row]
+        table_name = database.config.BALANCE_SHEET_TABLE
+        inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    return inserted_rows
+
+
+def save_balance_sheet_of_a_season_to_db(data=None):
+    inserted_rows = 0
+    stock_no = data.get('stock_no', None)
+    year = data.get('year', None)
+    season = data.get('season', None)
+
+    if data and stock_no and year and season:
+        table_columns = []
+        values = []
+        for key, value in data.iteritems():
+            if '' != value:
+                table_columns.append(key)
+                values.append(value)
+        if not is_balance_sheet_exist_in_db(stock_no, year, season) and values:
+            rows = [values]
+            table_name = database.config.BALANCE_SHEET_TABLE
+            inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    return inserted_rows
+
 
 def save_balance_sheet_of_a_season_to_temp(data=None):
+    filename = ''
     try:
         if not data:
             raise Exception('save_balance_sheet_of_a_season_to_temp fail, input data is None!')
 
         date = '{}-{}'.format(data['year'], data['season'])
         key = '{}-{}'.format(data['stock_no'], date)
+        filename = key
         target_file = data_fetch.config.FS_BALANCE_SHEET_PATH + '/{}.json'.format(date)
 
         lib.tool.init_json_file_if_not_exist(target_file)
@@ -104,7 +160,7 @@ def save_balance_sheet_of_a_season_to_temp(data=None):
             temp_file.write(save_data)
         return True
     except Exception as e:
-        msg = 'save_balance_sheet_of_a_season_to_temp error, msg = {}'.format(e.args)
+        msg = 'save_balance_sheet_of_a_season_to_temp error, filename = {}, msg = {}'.format(filename, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -112,11 +168,10 @@ def save_balance_sheet_of_a_season_to_temp(data=None):
 
 
 def get_balance_sheet_of_a_season_from_temp(stock_no='2330', year=2019, season=1):
+    date = '{}-{}'.format(year, season)
+    key = '{}-{}'.format(stock_no, date)
     try:
-        date = '{}-{}'.format(year, season)
-        key = '{}-{}'.format(stock_no, date)
         target_file = data_fetch.config.FS_BALANCE_SHEET_PATH + '/{}.json'.format(date)
-
         lib.tool.init_json_file_if_not_exist(target_file)
         json_obj = lib.tool.get_json_obj_from_temp_file(target_file)
         result = json_obj.get(key, None)
@@ -131,6 +186,7 @@ def get_balance_sheet_of_a_season_from_temp(stock_no='2330', year=2019, season=1
 
 def get_balance_sheet_of_a_season_from_url(stock_no='2330', year=2019, season=1):
     global dict_format
+    global except_percent_columns
     year_season = "{}-{}".format(year, season)
     try:
         query_year = year
@@ -220,7 +276,6 @@ def get_balance_sheet_of_a_season_from_url(stock_no='2330', year=2019, season=1)
             data.append(row)
 
     dict_data = {}
-    except_columns = []
     for row in data:
         row[0] = row[0].encode('utf8', 'ignore')
         row[1] = row[1].encode('utf8', 'ignore')
@@ -236,17 +291,31 @@ def get_balance_sheet_of_a_season_from_url(stock_no='2330', year=2019, season=1)
     info = {'stock_no': stock_no, 'year': year, 'season': season}
     if dict_data:
         dict_data.update(info)
-        dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_columns)
-        # 儲存至temp
-        save_balance_sheet_of_a_season_to_temp(dict_data)
+        dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_percent_columns)
 
     return dict_data
+
+
+def get_balance_sheet_of_a_season_from_db(stock_no='2330', year=2019, season=1):
+    table = database.config.BALANCE_SHEET_TABLE
+    sql = "SELECT * FROM {} WHERE stock_no='{}' and year='{}' and season='{}';".format(table, stock_no, year, season)
+    result = db_manager.select_query(sql, return_dict=True)
+    if result:
+        return lib.tool.byteify(result[0])
+    return None
 
 
 def get_balance_sheet_of_a_season(stock_no='2330', year=2019, season=1):
     result = get_balance_sheet_of_a_season_from_temp(stock_no, year, season)
     if not result:
-        result = get_balance_sheet_of_a_season_from_url(stock_no, year, season)
+        result = get_balance_sheet_of_a_season_from_db(stock_no, year, season)
+        if not result:
+            result = get_balance_sheet_of_a_season_from_url(stock_no, year, season)
+            if result and data_fetch.config.AUTO_SAVE_TO_DB:
+                save_balance_sheet_of_a_season_to_db(result)
+            lib.tool.delay_seconds()
+        if result and data_fetch.config.AUTO_SAVE_TO_TEMP:
+            save_balance_sheet_of_a_season_to_temp(result)
     return result
 
 
@@ -263,6 +332,18 @@ if __name__ == '__main__':
 
     # # test get_balance_sheet_of_a_season
     # r = get_balance_sheet_of_a_season()
+    # pp.pprint(r)
+
+    # # test is_balance_sheet_exist_in_db
+    # r = is_balance_sheet_exist_in_db()
+    # print(r)
+
+    # # test update_balance_sheet_of_a_season_to_db
+    # r = update_balance_sheet_of_a_season_to_db()
+    # pp.pprint(r)
+
+    # # test get_balance_sheet_of_a_season_from_db
+    # r = get_balance_sheet_of_a_season_from_db(stock_no='2330', year=2019, season=4)
     # pp.pprint(r)
 
     pass

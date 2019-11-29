@@ -212,7 +212,8 @@ def get_all_month_revenue_from_db(date='201909', return_dict=False):
     select_columns[1] = 'CAST(date AS CHAR) AS date'
     columns_str = ', '.join(select_columns)
     date = date[:4] + '-' + date[4:] + '-01'
-    sql = "SELECT {} FROM month_revenue WHERE date = '{}';".format(columns_str, date)
+    table = database.config.MONTH_REVENUE_TABLE
+    sql = "SELECT {} FROM {} WHERE date='{}';".format(table, columns_str, date)
     result = db_manager.select_query(sql, return_dict)
     if result:
         if return_dict:

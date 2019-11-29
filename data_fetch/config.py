@@ -6,6 +6,16 @@ Created on 2019/10/29 14:57
 """
 import os
 
+
+"""
+general setting
+"""
+# 自動將爬取的資料儲存至資料庫
+AUTO_SAVE_TO_DB = True
+
+# 自動將爬取的資料儲存至暫存檔
+AUTO_SAVE_TO_TEMP = True
+
 # 每次request的retry重傳間隔時間
 MAX_RETRY_SECONDS = 12
 MIN_RETRY_SECONDS = 8
