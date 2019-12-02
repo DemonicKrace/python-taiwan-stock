@@ -9,7 +9,11 @@ import requests
 import data_fetch.config
 import data_fetch.log
 import lib.tool
+import database.config
 from bs4 import BeautifulSoup
+import database.mysql_manager
+
+db_manager = database.mysql_manager.MysqlManager()
 
 # 綜合損益 statement_of_comprehensive_income
 # 爬取的欄位
@@ -55,6 +59,51 @@ except_percent_columns = [
     "basic_earnings_loss_per_share",
     "diluted_earnings_loss_per_share"
 ]
+
+
+def is_income_statement_exist_in_db(stock_no='2330', year=2019, season=1):
+    table = database.config.INCOME_STATEMENT_TABLE
+    sql = "select * from {} where stock_no='{}' and year='{}' and season='{}'".format(table, stock_no, year, season)
+    result = db_manager.select_query(sql)
+    if result:
+        return True
+    return False
+
+
+def update_income_statement_of_a_season_to_db(stock_no='2330', year=2019, season=1):
+    inserted_rows = 0
+    return_data = get_income_statement_of_a_season(stock_no, year, season)
+    if not is_income_statement_exist_in_db(stock_no, year, season) and return_data:
+        table_columns = []
+        row = []
+        for key, value in return_data.iteritems():
+            if '' != value:
+                table_columns.append(key)
+                row.append(value)
+        rows = [row]
+        table_name = database.config.INCOME_STATEMENT_TABLE
+        inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    return inserted_rows
+
+
+def save_income_statement_of_a_season_to_db(data=None):
+    inserted_rows = 0
+    stock_no = data.get('stock_no', None)
+    year = data.get('year', None)
+    season = data.get('season', None)
+
+    if data and stock_no and year and season:
+        table_columns = []
+        values = []
+        for key, value in data.iteritems():
+            if '' != value:
+                table_columns.append(key)
+                values.append(value)
+        if not is_income_statement_exist_in_db(stock_no, year, season) and values:
+            rows = [values]
+            table_name = database.config.INCOME_STATEMENT_TABLE
+            inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    return inserted_rows
 
 
 def save_income_statement_of_a_season_to_temp(data=None):
@@ -216,9 +265,6 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
     if dict_data:
         dict_data.update(info)
         dict_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, dict_data, except_percent_columns)
-        # 儲存至temp
-        save_income_statement_of_a_season_to_temp(dict_data)
-
     return dict_data
 
 
@@ -233,19 +279,19 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if not s1_data:
         s1_data = get_income_statement_from_url(stock_no, year, 1)
-        lib.tool.delay_seconds()()
+        lib.tool.delay_seconds()
 
     if not s2_data:
         s2_data = get_income_statement_from_url(stock_no, year, 2)
-        lib.tool.delay_seconds()()
+        lib.tool.delay_seconds()
 
     if not s3_data:
         s3_data = get_income_statement_from_url(stock_no, year, 3)
-        lib.tool.delay_seconds()()
+        lib.tool.delay_seconds()
 
     if not year_data:
         year_data = get_income_statement_from_url(stock_no, year, 4)
-        lib.tool.delay_seconds()()
+        lib.tool.delay_seconds()
 
     if s1_data and s2_data and s3_data and year_data:
         s4_data = {
@@ -293,8 +339,19 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
             else:
                 s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
 
+        if data_fetch.config.AUTO_SAVE_TO_TEMP:
+            save_income_statement_of_a_season_to_temp(s1_data)
+            save_income_statement_of_a_season_to_temp(s2_data)
+            save_income_statement_of_a_season_to_temp(s3_data)
+            save_income_statement_of_a_season_to_temp(year_data)
+
+        if data_fetch.config.AUTO_SAVE_TO_DB:
+            save_income_statement_of_a_season_to_db(s1_data)
+            save_income_statement_of_a_season_to_db(s2_data)
+            save_income_statement_of_a_season_to_db(s3_data)
+            save_income_statement_of_a_season_to_db(year_data)
+
         s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
-        save_income_statement_of_a_season_to_temp(s4_data)
     return s4_data
 
 
@@ -309,25 +366,31 @@ def get_income_statement_of_a_season_from_url(stock_no='2330', year=2019, season
     return result
 
 
+def get_income_statement_of_a_season_from_db(stock_no='2330', year=2019, season=1):
+    table = database.config.INCOME_STATEMENT_TABLE
+    sql = "SELECT * FROM {} WHERE stock_no='{}' and year='{}' and season='{}';".format(table, stock_no, year, season)
+    result = db_manager.select_query(sql, return_dict=True)
+    if result:
+        return lib.tool.byteify(result[0])
+    return None
+
+
 def get_income_statement_of_a_season(stock_no='2330', year=2019, season=1):
     result = get_income_statement_of_a_season_from_temp(stock_no, year, season)
     if not result:
-        result = get_income_statement_of_a_season_from_url(stock_no, year, season)
+        result = get_income_statement_of_a_season_from_db(stock_no, year, season)
+        if not result:
+            result = get_income_statement_of_a_season_from_url(stock_no, year, season)
+            if result and data_fetch.config.AUTO_SAVE_TO_DB:
+                save_income_statement_of_a_season_to_db(result)
+            lib.tool.delay_seconds()
+        if result and data_fetch.config.AUTO_SAVE_TO_TEMP:
+            save_income_statement_of_a_season_to_temp(result)
     return result
 
 
 if __name__ == "__main__":
     import pprint as pp
-
-    # # test save_income_statement_of_a_season_to_temp
-    # d = {
-    #     'stock_no': '2330',
-    #     'year': 2019,
-    #     'season': 1,
-    #     'data': 'data'
-    # }
-    # r = save_income_statement_of_a_season_to_temp(d)
-    # print(r)
 
     # # test get_income_statement_of_a_season_from_url
     # d = get_income_statement_of_a_season_from_url()
@@ -337,12 +400,16 @@ if __name__ == "__main__":
     # r = get_income_statement_of_a_season_from_temp()
     # pp.pprint(r)
 
-    # test get_income_statement_of_a_season_from_url
+    # # test get_income_statement_of_a_season_from_url
     # s = get_income_statement_of_a_season_from_url('2330', 2018, 4)
     # pp.pprint(s)
 
+    # # test get_income_statement_of_a_season_from_db
+    # s = get_income_statement_of_a_season_from_db('2330', 2018, 4)
+    # pp.pprint(s)
+
     # # test get_income_statement_of_a_season
-    # r = get_income_statement_of_a_season('2330', 2019, 1)
+    # r = get_income_statement_of_a_season('2330', 2018, 4)
     # pp.pprint(r)
 
     # test get_income_statement_of_a_season
@@ -363,6 +430,10 @@ if __name__ == "__main__":
     #     pp.pprint(r)
     #     lib.tool.delay_seconds()()
     # r = get_income_statement_from_url('2330', 2018, 4)
+    # pp.pprint(r)
+
+    # # test update_income_statement_of_a_season_to_db
+    # r = update_income_statement_of_a_season_to_db('2330', 2018, 4)
     # pp.pprint(r)
 
     pass

@@ -13,18 +13,6 @@ import database.mysql_manager
 
 db_manager = database.mysql_manager.MysqlManager()
 
-
-# 更新月營收資訊至資料庫
-def update_month_revenue(dates=None):
-    if dates is None:
-        dates = []
-    for date in dates:
-        print('start update month revenue, date={}'.format(date))
-        data = data_fetch.month_revenue.get_all_month_revenue(date)
-        db_manager.insert_month_revenue_to_db(date, data)
-        lib.tool.delay_seconds()()
-
-
 # 更新股價資料到資料庫
 def update_stock_price_by_a_day(dates=None):
     if dates is None:
@@ -49,13 +37,6 @@ def stock_info_update():
 
 
 if __name__ == '__main__':
-
-    # # test update_month_revenue
-    # dates = [
-    #     '201901'
-    # ]
-    # update_month_revenue(dates)
-
     # # test update_stock_price_by_a_day
     # dates = [
     #     '2019-11-04',
