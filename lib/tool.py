@@ -85,7 +85,7 @@ def fill_default_value_if_column_not_exist(format_data=None, data=None, except_p
 
 def delay_seconds(min_wait_seconds=10, max_wait_seconds=20):
     seconds = random.randint(min_wait_seconds, max_wait_seconds)
-    print('wait {} seconds...\n'.format(seconds))
+    print('wait {} seconds...'.format(seconds))
     time.sleep(seconds)
 
 
