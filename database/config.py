@@ -9,6 +9,7 @@ DB_HOST = 'localhost'
 DB_USER = 'root'
 DB_PWD = 'root'
 DB_DEFAULT = 'stock'
+DB_PORT = 3306
 
 # table name
 STOCK_PRICE_TABLE = 'stock'

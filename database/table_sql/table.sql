@@ -8,7 +8,7 @@ CREATE TABLE `stock` (
   `high` float NOT NULL COMMENT '最高價',
   `low` float NOT NULL COMMENT '最低價',
   `close` float NOT NULL COMMENT '收盤價',
-  `bid_ask_spread` varchar(10) NOT NULL COMMENT 'Ex-dividend date (價差)',
+  `bid_ask_spread` varchar(10) NOT NULL COMMENT 'Ex-dividend date (價差), 除權息日',
   `deal` int(11) NOT NULL COMMENT '成交筆數',
   PRIMARY KEY (`stock_no`,`date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='股價表';

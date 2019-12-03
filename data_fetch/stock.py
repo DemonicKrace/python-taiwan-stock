@@ -9,14 +9,15 @@ import requests
 import os
 import data_fetch.config
 import data_fetch.log
+import lib.tool
 from bs4 import BeautifulSoup
+import database.config
 import database.mysql_manager
 
 db_manager = database.mysql_manager.MysqlManager()
 
-current_dir_path = os.path.dirname(os.path.realpath(__file__))
-otc_info_file = current_dir_path + "/{}".format(data_fetch.config.TWSE_INFO_FILENAME)
-twse_info_file = current_dir_path + "/{}".format(data_fetch.config.OTC_INFO_FILENAME)
+otc_info_file = data_fetch.config.STOCK_INFO_SAVE_PATH + "/{}".format(data_fetch.config.OTC_INFO_FILENAME)
+twse_info_file = data_fetch.config.STOCK_INFO_SAVE_PATH + "/{}".format(data_fetch.config.TWSE_INFO_FILENAME)
 
 # www.twse.com.tw，民國81年1月4號起開始提供股票股價資料
 
@@ -29,16 +30,52 @@ twse_info_file = current_dir_path + "/{}".format(data_fetch.config.OTC_INFO_FILE
     [股票代號, 公司名稱, 上櫃/市日期,    產業別]
 ex: [   5209,    新鼎, 2002/02/25, 資訊服務業]
 """
+stock_info_columns = [
+    "stock_no",
+    "company_name",
+    "date",
+    "business_type",
+    "market_type"
+]
+
+stock_price_columns = [
+    "stock_no",
+    "date",
+    "shares",
+    "turnover",
+    "open",
+    "high",
+    "low",
+    "close",
+    "bid_ask_spread",
+    "deal"
+]
+
+def update_latest_all_stock_info_to_db_and_temp():
+    global stock_info_columns
+    inserted_rows = 0
+    download_latest_twse_stock_info()
+    lib.tool.delay_short_seconds()
+    download_latest_otc_stock_info()
+    lib.tool.delay_short_seconds()
+    rows = get_stock_info_from_temp('all', return_dict=False)
+    if rows:
+        table_name = database.config.STOCK_INFO_TABLE
+        sql = "TRUNCATE TABLE {};".format(table_name)
+        result = db_manager.sql_dml_query(sql)
+        if result:
+            inserted_rows = db_manager.insert_rows(stock_info_columns, rows, table_name)
+    return inserted_rows
 
 
-# 下載twse公司資訊為csv檔
-def download_twse_stock_info():
+# 下載最新twse公司資訊為csv檔
+def download_latest_twse_stock_info():
+    global twse_info_file
     try:
         header = data_fetch.config.HEADER
         html = requests.get(data_fetch.config.TWSE_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
         soup = BeautifulSoup(html.text, "html.parser")
         table = soup.find("table", attrs={"class": "h4"})
-
         rows = []
         for row in table.find_all('tr'):
             rows.append([val.text.strip().encode("utf8") for val in row.find_all('td')])
@@ -60,14 +97,15 @@ def download_twse_stock_info():
                     writer.writerows([row_list])
             print('{} was download.'.format(twse_info_file))
     except Exception as e:
-        msg = 'download_twse_stock_info error, msg = {}'.format(e.args)
+        msg = 'download_latest_twse_stock_info error, msg = {}'.format(e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
 
 
-# 下載otc公司資訊為csv檔
-def download_otc_stock_info():
+# 下載最新otc公司資訊為csv檔
+def download_latest_otc_stock_info():
+    global otc_info_file
     try:
         header = data_fetch.config.HEADER
         html = requests.get(data_fetch.config.OTC_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
@@ -96,8 +134,9 @@ def download_otc_stock_info():
                     writer.writerows([row_list])
                 if row[0] == "股票":
                     start = True
+        print('{} was download.'.format(otc_info_file))
     except Exception as e:
-        msg = 'download_otc_stock_info error, msg = {}'.format(e.args)
+        msg = 'download_latest_otc_stock_info error, msg = {}'.format(e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -105,42 +144,76 @@ def download_otc_stock_info():
 
 # 由已下載的csv檔取得上市櫃公司資訊
 # file_type = 'all' | 'twse | 'otc'
-def get_stock_info_from_csv(file_type='all'):
+def get_stock_info_from_temp(file_type='all', return_dict=False):
     if 'twse' == file_type:
         info_file = twse_info_file
     elif 'otc' == file_type:
         info_file = otc_info_file
     elif 'all' == file_type:
-        return get_stock_info_from_csv('twse') + get_stock_info_from_csv('otc')
+        return get_stock_info_from_temp('twse', return_dict) + get_stock_info_from_temp('otc', return_dict)
     else:
         return None
 
+    data = []
     try:
         stock_type = ''
         if 'twse' == file_type:
             stock_type = 'twse'
             if not os.path.exists(info_file):
-                download_twse_stock_info()
+                download_latest_twse_stock_info()
         elif 'otc' == file_type:
             stock_type = 'otc'
             if not os.path.exists(info_file):
-                download_otc_stock_info()
+                download_latest_otc_stock_info()
         # read csv
-        data = []
         with open(info_file) as f:
             csv_reader = csv.reader(f)
             for i, row in enumerate(csv_reader, 1):
                 if i == 1:
                     continue
-                data.append([row[0], row[1], row[2], row[3], stock_type])
-        return data
+                if return_dict:
+                    data.append({
+                        "stock_no": row[0],
+                        "company_name": row[1],
+                        "date": row[2].replace('/', '-'),
+                        "business_type": row[3],
+                        "market_type": stock_type
+                    })
+                else:
+                    data.append([
+                        row[0],
+                        row[1],
+                        row[2].replace('/', '-'),
+                        row[3],
+                        stock_type
+                    ])
     except Exception as e:
-        msg = 'get_twse_stock_info_by_csv error, msg = {}'.format(e.args)
+        msg = 'get_stock_info_from_temp error, msg = {}'.format(e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
 
-    return []
+    return data
+
+
+def get_all_stock_info_from_db():
+    global stock_info_columns
+    table_name = database.config.STOCK_INFO_TABLE
+    table_columns = stock_info_columns
+    table_columns[2] = 'CAST(date AS CHAR) AS date'
+    columns_str = ', '.join(table_columns)
+    sql = 'SELECT {} FROM {};'.format(columns_str, table_name)
+    result = db_manager.select_query(sql, return_dict=True)
+    if result:
+        return lib.tool.byteify(result)
+    return None
+
+
+def get_all_stock_info():
+    result = get_stock_info_from_temp(file_type='all')
+    if not result:
+        result = get_all_stock_info_from_db()
+    return result
 
 
 # 取得該日期的全部上市櫃股價資料
@@ -154,8 +227,8 @@ def get_all_twse_stock_price_by_a_day(date='2000-01-01'):
     header = data_fetch.config.HEADER
     result = []
     try:
-        r = requests.get(url, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
-        data = r.json()
+        response = requests.get(url, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
+        data = response.json()
         if 'data9' not in data:
             return result
         for row in data['data9']:
@@ -168,7 +241,7 @@ def get_all_twse_stock_price_by_a_day(date='2000-01-01'):
                 row[7] = '0'
                 row[8] = '0'
                 row[10] = '0'
-            r = [
+            new_row = [
                 row[0],
                 date,
                 row[2].replace(',', ''),
@@ -180,10 +253,10 @@ def get_all_twse_stock_price_by_a_day(date='2000-01-01'):
                 bid_ask_spread + row[10].replace(',', ''),
                 row[3].replace(',', '')
             ]
-            result.append(r)
+            result.append(new_row)
     except Exception as e:
         print(e.args)
-    return result
+    return lib.tool.byteify(result)
 
 
 # 取得該日期的全部上櫃股價資料
@@ -195,8 +268,8 @@ def get_all_otc_stock_price_by_a_day(date='2000-01-01'):
     header = data_fetch.config.HEADER
     result = []
     try:
-        r = requests.get(url, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
-        data = r.json()
+        response = requests.get(url, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
+        data = response.json()
         for row in data['aaData']:
             if '--' in row[4]:
                 row[4] = '0'
@@ -204,7 +277,7 @@ def get_all_otc_stock_price_by_a_day(date='2000-01-01'):
                 row[6] = '0'
                 row[2] = '0'
                 row[3] = '0'
-            r = [
+            new_row = [
                 row[0],
                 date,
                 row[7].replace(',', ''),
@@ -216,14 +289,14 @@ def get_all_otc_stock_price_by_a_day(date='2000-01-01'):
                 row[3].replace(',', '').replace('+', ''),
                 row[9].replace(',', '')
             ]
-            result.append(r)
+            result.append(new_row)
     except Exception as e:
         print(e.args)
-    return result
+    return lib.tool.byteify(result)
 
 
 # 確認該日期的上市櫃股價資料是否存在於資料庫
-def check_all_stock_price_exist_in_db_by_date(date='2000-01-01'):
+def is_all_stock_price_exist_in_db_by_date(date='2000-01-01'):
     sql = "SELECT stock_no FROM stock where date = '{}';".format(date)
     result = db_manager.select_query(sql)
     if len(result) > 0:
@@ -238,43 +311,69 @@ def get_stock_price_from_db_by_a_date(stock_no='2330', date='2000-01-01'):
     if result:
         return result[0]
     return None
-    pass
+
+
+def update_all_stock_price_a_day_to_db(date='2000-01-01'):
+    inserted_rows = 0
+    if not is_all_stock_price_exist_in_db_by_date(date):
+        rows = get_all_stock_price_by_a_day(date)
+        inserted_rows = save_all_stock_price_a_day_to_db(rows)
+    return inserted_rows
+
+
+def save_all_stock_price_a_day_to_db(data=None):
+    global stock_price_columns
+    inserted_row = 0
+    if data:
+        table_name = database.config.STOCK_PRICE_TABLE
+        inserted_row = db_manager.insert_rows(stock_price_columns, data, table_name)
+    return inserted_row
 
 
 if __name__ == '__main__':
-    # import pprint as pp
+    import pprint as pp
 
     # # test get_all_twse_stock_price_by_a_day
     # r = get_all_twse_stock_price_by_a_day('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
-    #
+
     # # test get_all_otc_stock_price_by_a_day
     # r = get_all_otc_stock_price_by_a_day('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
-    #
+
     # # test get_all_stock_price_by_a_day
     # r = get_all_stock_price_by_a_day('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
 
     # # test check_all_stock_price_exist_by_date
-    # r = check_all_stock_price_exist_in_db_by_date('2019-11-06')
+    # r = is_all_stock_price_exist_in_db_by_date('2019-11-06')
     # print(r)
 
-    # # test download_twse_stock_info
-    # r = download_twse_stock_info()
-    # print(len(r))
+    # # test download_latest_twse_stock_info
+    # download_latest_twse_stock_info()
+    #
+    # # test download_latest_otc_stock_info
+    # download_latest_otc_stock_info()
 
-    # # test download_otc_stock_info
-    # r = download_otc_stock_info()
-    # pp.pprint(r)
-
-    # # test get_stock_info_from_csv
-    # r = get_stock_info_from_csv('all')
+    # # test get_stock_info_from_temp
+    # r = get_stock_info_from_temp('all', return_dict=False)
     # pp.pprint(r)
     # print(len(r))
+
+    # # test get_all_stock_info_from_db
+    # r = get_all_stock_info_from_db()
+    # pp.pprint(r)
+
+    # # test update_latest_all_stock_info
+    # r = update_latest_all_stock_info()
+    # pp.pprint(r)
+
+    # # test update_all_stock_price_a_day_to_db
+    # r = update_all_stock_price_a_day_to_db('2019-11-07')
+    # pp.pprint(r)
 
     pass
 

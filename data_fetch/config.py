@@ -63,6 +63,11 @@ FS_MONTH_REVENUE_PATH = FINANCIAL_STATEMENT_PATH + '/month_revenue'
 # 公開觀測站最新發布財報之公司代號的暫存檔路徑
 NEWEST_REPORT_INFO_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/newest_publish_info_temp'
 
+# 股票資訊暫存檔路徑
+STOCK_INFO_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/stock_info'
+
+# 股價暫存檔案路徑
+STOCK_PRICE_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/stock_price'
 
 """
 url

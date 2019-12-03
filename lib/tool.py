@@ -60,7 +60,6 @@ def init_json_file_if_not_exist(target_file):
 def get_json_obj_from_temp_file(target_file):
     with open(target_file) as temp_file:
         json_obj = json_load_byteified(temp_file)
-        # json_obj = json.load(temp_file)
         return json_obj
 
 
@@ -87,6 +86,10 @@ def delay_seconds(min_wait_seconds=10, max_wait_seconds=20):
     seconds = random.randint(min_wait_seconds, max_wait_seconds)
     print('wait {} seconds...'.format(seconds))
     time.sleep(seconds)
+
+
+def delay_short_seconds():
+    delay_seconds(3, 6)
 
 
 if __name__ == '__main__':
