@@ -8,6 +8,7 @@ import os
 import json
 import time
 import random
+import data_fetch.config as config
 
 
 def json_load_byteified(file_handle):
@@ -82,14 +83,18 @@ def fill_default_value_if_column_not_exist(format_data=None, data=None, except_p
     return data
 
 
-def delay_seconds(min_wait_seconds=10, max_wait_seconds=20):
+def delay_seconds(min_wait_seconds=config.MIN_WAIT_SECONDS, max_wait_seconds=config.MAX_WAIT_SECONDS):
     seconds = random.randint(min_wait_seconds, max_wait_seconds)
     print('wait {} seconds...'.format(seconds))
     time.sleep(seconds)
 
 
+def delay_long_seconds():
+    delay_seconds(config.MIN_LONG_WAIT_SECONDS, config.MAX_LONG_WAIT_SECONDS)
+
+
 def delay_short_seconds():
-    delay_seconds(3, 6)
+    delay_seconds(config.MIN_SHORT_WAIT_SECONDS, config.MAX_SHORT_WAIT_SECONDS)
 
 
 if __name__ == '__main__':

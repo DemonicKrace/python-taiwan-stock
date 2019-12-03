@@ -44,10 +44,13 @@ def is_month_revenue_exist_in_db(date='201909'):
 def update_all_month_revenue_to_db(date='201909'):
     global table_columns
     inserted_rows = 0
-    rows = get_all_month_revenue_from_temp(date, return_dict=False)
-    if not is_month_revenue_exist_in_db(date) and rows:
-        table_name = database.config.MONTH_REVENUE_TABLE
-        inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    if is_month_revenue_exist_in_db(date):
+        print('month revenue is already exist, month = {}'.format(date))
+    else:
+        rows = get_all_month_revenue_from_temp(date, return_dict=False)
+        if rows:
+            table_name = database.config.MONTH_REVENUE_TABLE
+            inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
     return inserted_rows
 
 
@@ -103,7 +106,7 @@ def get_twse_month_revenue_from_temp(date='201909'):
     try:
         if not os.path.exists(twes_xls_file) and data_fetch.config.AUTO_SAVE_TO_TEMP:
             download_twse_month_revenue(date)
-            lib.tool.delay_seconds()
+            lib.tool.delay_short_seconds()
         workbook = xlrd.open_workbook(twes_xls_file)
         sheet = workbook.sheet_by_index(0)
         end_row = sheet.nrows
@@ -156,7 +159,7 @@ def get_otc_month_revenue_from_temp(date='201909'):
     try:
         if not os.path.exists(otc_xls_file) and data_fetch.config.AUTO_SAVE_TO_TEMP:
             download_otc_month_revenue(date)
-            lib.tool.delay_seconds()
+            lib.tool.delay_short_seconds()
         workbook = xlrd.open_workbook(otc_xls_file)
         # otc has two sheets
         sheets = [
@@ -251,7 +254,7 @@ def get_all_month_revenue(date='201909', return_dict=False):
     result = get_all_month_revenue_from_db(date, return_dict)
     if not result:
         result = get_all_month_revenue_from_temp(date, return_dict)
-        if result and data_fetch.config.AUTO_SAVE_TO_DB:
+        if data_fetch.config.AUTO_SAVE_TO_DB and result:
             update_all_month_revenue_to_db(date)
     return result
 

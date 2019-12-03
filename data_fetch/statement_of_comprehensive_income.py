@@ -72,17 +72,21 @@ def is_income_statement_exist_in_db(stock_no='2330', year=2019, season=1):
 
 def update_income_statement_of_a_season_to_db(stock_no='2330', year=2019, season=1):
     inserted_rows = 0
-    return_data = get_income_statement_of_a_season(stock_no, year, season)
-    if not is_income_statement_exist_in_db(stock_no, year, season) and return_data:
-        table_columns = []
-        row = []
-        for key, value in return_data.iteritems():
-            if '' != value:
-                table_columns.append(key)
-                row.append(value)
-        rows = [row]
-        table_name = database.config.INCOME_STATEMENT_TABLE
-        inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+    if is_income_statement_exist_in_db(stock_no, year, season):
+        print('income statement is already exist, stock_no = {}, year= {}, season = {}'.format(stock_no, year, season))
+    else:
+        return_data = get_income_statement_of_a_season_from_url(stock_no, year, season)
+        if return_data:
+            table_columns = []
+            row = []
+            for key, value in return_data.iteritems():
+                if '' != value:
+                    table_columns.append(key)
+                    row.append(value)
+            rows = [row]
+            table_name = database.config.INCOME_STATEMENT_TABLE
+            inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+        lib.tool.delay_short_seconds()
     return inserted_rows
 
 

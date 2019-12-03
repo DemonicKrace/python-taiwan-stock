@@ -51,6 +51,7 @@ stock_price_columns = [
     "deal"
 ]
 
+
 def update_latest_all_stock_info_to_db_and_temp():
     global stock_info_columns
     inserted_rows = 0
@@ -217,12 +218,29 @@ def get_all_stock_info():
 
 
 # 取得該日期的全部上市櫃股價資料
-def get_all_stock_price_by_a_day(date='2000-01-01'):
-    return get_all_twse_stock_price_by_a_day(date) + get_all_otc_stock_price_by_a_day(date)
+def get_all_stock_price_by_a_day_from_url(date='2000-01-01'):
+    return get_all_twse_stock_price_by_a_day_from_url(date) + get_all_otc_stock_price_by_a_day_from_url(date)
+
+
+#
+def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_dict=False):
+    global stock_price_columns
+    select_columns = stock_price_columns
+    select_columns[1] = 'CAST(date AS CHAR) AS date'
+    columns_str = ', '.join(select_columns)
+    table_name = database.config.STOCK_PRICE_TABLE
+    sql = "SELECT {} FROM {} WHERE date='{}';".format(columns_str, table_name, date)
+    result = db_manager.select_query(sql, return_dict)
+    if result:
+        if return_dict:
+            return lib.tool.byteify(result)
+        else:
+            return [list(row) for row in result]
+    return None
 
 
 # 取得該日期的全部上市股價資料
-def get_all_twse_stock_price_by_a_day(date='2000-01-01'):
+def get_all_twse_stock_price_by_a_day_from_url(date='2000-01-01'):
     url = data_fetch.config.TWSE_STOCK_BY_A_DAY_URL.format(date.replace('-', ''))
     header = data_fetch.config.HEADER
     result = []
@@ -260,7 +278,7 @@ def get_all_twse_stock_price_by_a_day(date='2000-01-01'):
 
 
 # 取得該日期的全部上櫃股價資料
-def get_all_otc_stock_price_by_a_day(date='2000-01-01'):
+def get_all_otc_stock_price_by_a_day_from_url(date='2000-01-01'):
     year = str(int(date.split('-')[0]) - 1911)
     month = date.split('-')[1]
     day = date.split('-')[2]
@@ -315,9 +333,12 @@ def get_stock_price_from_db_by_a_date(stock_no='2330', date='2000-01-01'):
 
 def update_all_stock_price_a_day_to_db(date='2000-01-01'):
     inserted_rows = 0
-    if not is_all_stock_price_exist_in_db_by_date(date):
-        rows = get_all_stock_price_by_a_day(date)
+    if is_all_stock_price_exist_in_db_by_date(date):
+        print('stock price is already exist, date = {}'.format(date))
+    else:
+        rows = get_all_stock_price_by_a_day_from_url(date)
         inserted_rows = save_all_stock_price_a_day_to_db(rows)
+        lib.tool.delay_short_seconds()
     return inserted_rows
 
 
@@ -333,18 +354,18 @@ def save_all_stock_price_a_day_to_db(data=None):
 if __name__ == '__main__':
     import pprint as pp
 
-    # # test get_all_twse_stock_price_by_a_day
-    # r = get_all_twse_stock_price_by_a_day('2019-11-06')
+    # # test get_all_twse_stock_price_by_a_day_from_url
+    # r = get_all_twse_stock_price_by_a_day_from_url('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
 
-    # # test get_all_otc_stock_price_by_a_day
-    # r = get_all_otc_stock_price_by_a_day('2019-11-06')
+    # # test get_all_otc_stock_price_by_a_day_from_url
+    # r = get_all_otc_stock_price_by_a_day_from_url('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
 
-    # # test get_all_stock_price_by_a_day
-    # r = get_all_stock_price_by_a_day('2019-11-06')
+    # # test get_all_stock_price_by_a_day_from_url
+    # r = get_all_stock_price_by_a_day_from_url('2019-11-06')
     # pp.pprint(r)
     # print(len(r))
 
@@ -367,6 +388,10 @@ if __name__ == '__main__':
     # r = get_all_stock_info_from_db()
     # pp.pprint(r)
 
+    # # test get_all_stock_info
+    # r = get_all_stock_info()
+    # pp.pprint(r)
+
     # # test update_latest_all_stock_info
     # r = update_latest_all_stock_info()
     # pp.pprint(r)
@@ -374,6 +399,11 @@ if __name__ == '__main__':
     # # test update_all_stock_price_a_day_to_db
     # r = update_all_stock_price_a_day_to_db('2019-11-07')
     # pp.pprint(r)
+
+    # # test get_all_stock_price_by_a_day_from_db
+    # r = get_all_stock_price_by_a_day_from_db('2019-11-04', return_dict=True)
+    # pp.pprint(r)
+    # print(len(r))
 
     pass
 
