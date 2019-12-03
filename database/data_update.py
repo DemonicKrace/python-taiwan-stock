@@ -101,13 +101,13 @@ if __name__ == '__main__':
     # # test update_stock_info
     # update_stock_info()
 
-    # test update_month_revenue
-    months = [
-        '201901',
-        '201902',
-        '201903',
-    ]
-    update_month_revenue(months)
+    # # test update_month_revenue
+    # months = [
+    #     '201901',
+    #     '201902',
+    #     '201903',
+    # ]
+    # update_month_revenue(months)
 
     # # test update_all_fs_by_seasons
     # seasons = [
