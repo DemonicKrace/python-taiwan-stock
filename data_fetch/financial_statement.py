@@ -135,6 +135,19 @@ def get_company_list_fs_exist_in_db_by_season(year=None, season=None):
     return return_list
 
 
+# 取得公司代號
+def get_company_list(source_type='newest_publish', year=None, season=None):
+    company_list = []
+    if 'newest_publish' == source_type:
+        company_list = get_newest_company_report_info()
+    elif 'target_season' == source_type:
+        company_list = get_company_list_fs_exist_in_db_by_season(year, season)
+    elif '.txt' == source_type.split('.')[1]:
+        temp = source_type
+        company_list = get_stockno_from_temp(temp)
+    return company_list
+
+
 if __name__ == "__main__":
     import pprint as pp
 
@@ -149,5 +162,13 @@ if __name__ == "__main__":
     # r = get_company_list_fs_exist_in_db_by_season(2018, 1)
     # pp.pprint(r)
     # print(len(r))
+
+    # test get_company_list
+    # r = get_company_list(source_type='newest_publish')
+    # pp.pprint(r)
+    # r = get_company_list(source_type='target_season', 2018, 1)
+    # pp.pprint(r)
+    # r = get_company_list(source_type='2019-12-04_16-21-07.txt')
+    # pp.pprint(r)
 
     pass

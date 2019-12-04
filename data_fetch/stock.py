@@ -206,10 +206,19 @@ def get_all_stock_info_from_db():
     return None
 
 
-def get_all_stock_info():
+def get_all_stock_info(return_type='array'):
     result = get_stock_info_from_temp(file_type='all')
-    if not result:
+    if 'array' == return_type and not result:
         result = get_all_stock_info_from_db()
+    if 'dict' == return_type:
+        result = {
+            row[0]: {
+                stock_info_columns[1]: row[1],
+                stock_info_columns[2]: row[2],
+                stock_info_columns[3]: row[3],
+                stock_info_columns[4]: row[4]
+            } for row in result
+        }
     return result
 
 
@@ -382,8 +391,10 @@ if __name__ == '__main__':
     # r = get_all_stock_info_from_db()
     # pp.pprint(r)
 
-    # # test get_all_stock_info
-    # r = get_all_stock_info()
+    # test get_all_stock_info
+    # r = get_all_stock_info(return_type='array')
+    # pp.pprint(r)
+    # r = get_all_stock_info(return_type='dict')
     # pp.pprint(r)
 
     # # test update_latest_all_stock_info
