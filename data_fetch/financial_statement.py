@@ -8,7 +8,11 @@ import requests
 import datetime
 import data_fetch.config
 import data_fetch.log
+import database.config
+import database.mysql_manager
 from bs4 import BeautifulSoup
+
+db_manager = database.mysql_manager.MysqlManager()
 
 company_type = [
     "上櫃公司",
@@ -108,6 +112,29 @@ def get_stockno_from_temp(filename):
     return data
 
 
+# 取得在資料庫中已有該季財報的公司代號
+def get_company_list_fs_exist_in_db_by_season(year=None, season=None):
+    bs_table_name = database.config.BALANCE_SHEET_TABLE
+    bs_sql = "SELECT DISTINCT stock_no FROM {} WHERE year='{}' AND season='{}';".format(bs_table_name, year, season)
+    bs_result = db_manager.select_query(bs_sql, return_dict=False)
+    bs_list = []
+    if bs_result:
+        bs_list = [stock_no[0] for stock_no in bs_result]
+
+    is_table_name = database.config.INCOME_STATEMENT_TABLE
+    is_sql = "SELECT DISTINCT stock_no FROM {} WHERE year='{}' AND season='{}';".format(is_table_name, year, season)
+    is_result = db_manager.select_query(is_sql, return_dict=False)
+    is_list = []
+    if is_result:
+        is_list = [stock_no[0] for stock_no in is_result]
+
+    if len(bs_list) > len(is_list):
+        return_list = bs_list
+    else:
+        return_list = is_list
+    return return_list
+
+
 if __name__ == "__main__":
     import pprint as pp
 
@@ -117,5 +144,10 @@ if __name__ == "__main__":
     # temp = '2019-12-04_16-21-07.txt'
     # r = get_stockno_from_temp(temp)
     # pp.pprint(r)
+
+    # # get_company_list_fs_exist_in_db_by_season
+    # r = get_company_list_fs_exist_in_db_by_season(2018, 1)
+    # pp.pprint(r)
+    # print(len(r))
 
     pass
