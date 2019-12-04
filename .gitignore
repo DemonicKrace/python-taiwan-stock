@@ -6,6 +6,7 @@ database/__pycache__/
 .idea/
 venv/
 other/
+analysis
 analysis_report/
 report/
 financial_statement_report/report/*
