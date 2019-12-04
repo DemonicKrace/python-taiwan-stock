@@ -157,7 +157,7 @@ def get_income_statement_of_a_season_from_temp(stock_no='2330', year=2019, seaso
 def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
     global dict_format
     global except_percent_columns
-    year_season = "{}-{}".format(year, season)    
+    stockno_year_season = "{}-{}-{}".format(stock_no, year, season)
     try:
         query_year = year
         if 1911 < query_year:
@@ -229,7 +229,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
         table = soup.find("table", "hasBorder")
         all_row = table.find_all("tr")
     except Exception as e:
-        msg = 'get_income_statement_from_url error, year_season = {}, msg = {}'.format(year_season, e.args)
+        msg = 'get_income_statement_from_url error, stockno_year_season = {}, msg = {}'.format(stockno_year_season, e.args)
         print(msg)
         log = data_fetch.log.Log()
         log.write_fetch_err_log(msg)
@@ -438,6 +438,10 @@ if __name__ == "__main__":
 
     # # test update_income_statement_of_a_season_to_db
     # r = update_income_statement_of_a_season_to_db('2330', 2018, 4)
+    # pp.pprint(r)
+
+    # # test bank
+    # r = get_income_statement_of_a_season_from_url('2891', 2019, 1)
     # pp.pprint(r)
 
     pass
