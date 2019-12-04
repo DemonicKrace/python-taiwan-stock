@@ -42,7 +42,6 @@ def is_month_revenue_exist_in_db(date='201909'):
 
 
 def update_all_month_revenue_to_db(date='201909'):
-    global table_columns
     inserted_rows = 0
     if is_month_revenue_exist_in_db(date):
         print('month revenue is already exist, month = {}'.format(date))
@@ -213,7 +212,6 @@ def get_otc_month_revenue_from_temp(date='201909'):
 
 
 def get_all_month_revenue_from_db(date='201909', return_dict=False):
-    global table_columns
     select_columns = table_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
     columns_str = ', '.join(select_columns)
@@ -230,7 +228,6 @@ def get_all_month_revenue_from_db(date='201909', return_dict=False):
 
 
 def get_all_month_revenue_from_temp(date='201909', return_dict=False):
-    global table_columns
     twse_data = get_twse_month_revenue_from_temp(date)
     otc_data = get_otc_month_revenue_from_temp(date)
 
@@ -261,7 +258,6 @@ def get_all_month_revenue(date='201909', return_dict=False):
 
 # from db
 def get_month_revenue_by_stockno_date(stock_no='2330', date='201909', return_dict=False):
-    global table_columns
     select_columns = table_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
     columns_str = ', '.join(select_columns)

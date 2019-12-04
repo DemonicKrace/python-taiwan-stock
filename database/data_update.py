@@ -68,7 +68,6 @@ def update_balance_sheet_by_a_season(stock_no=None, year=None, season=None):
 
 # 更新全部上市櫃財報
 def update_all_fs_by_seasons(dates=None):
-    global except_business_type
     print('update_all_fs_by_seasons start...\n')
     if not dates:
         dates = []
@@ -122,14 +121,16 @@ if __name__ == '__main__':
     # ]
     # update_month_revenue(months)
 
-    # # test update_all_fs_by_seasons
-    # seasons = [
-    #     [2018, 1],
-    #     [2018, 2],
-    #     [2018, 3],
-    #     [2018, 4],
-    #     [2018, 5]
-    # ]
-    # update_all_fs_by_seasons(seasons)
+    # test update_all_fs_by_seasons
+    seasons = [
+        [2018, 1],
+        [2018, 2],
+        [2018, 3],
+        [2018, 4],
+        [2018, 5],
+        [2019, 1],
+        [2019, 2]
+    ]
+    update_all_fs_by_seasons(seasons)
 
     pass

@@ -155,8 +155,6 @@ def get_income_statement_of_a_season_from_temp(stock_no='2330', year=2019, seaso
 
 
 def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
-    global dict_format
-    global except_percent_columns
     stockno_year_season = "{}-{}-{}".format(stock_no, year, season)
     try:
         query_year = year
@@ -273,8 +271,6 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
 
 
 def get_income_statement_of_a_season4(stock_no='2330', year=2018):
-    global dict_format
-    global except_percent_columns
     s1_data = get_income_statement_of_a_season_from_temp(stock_no, year, 1)
     s2_data = get_income_statement_of_a_season_from_temp(stock_no, year, 2)
     s3_data = get_income_statement_of_a_season_from_temp(stock_no, year, 3)

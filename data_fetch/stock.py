@@ -53,7 +53,6 @@ stock_price_columns = [
 
 
 def update_latest_all_stock_info_to_db_and_temp():
-    global stock_info_columns
     inserted_rows = 0
     download_latest_twse_stock_info()
     lib.tool.delay_short_seconds()
@@ -71,7 +70,6 @@ def update_latest_all_stock_info_to_db_and_temp():
 
 # 下載最新twse公司資訊為csv檔
 def download_latest_twse_stock_info():
-    global twse_info_file
     try:
         header = data_fetch.config.HEADER
         html = requests.get(data_fetch.config.TWSE_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
@@ -106,7 +104,6 @@ def download_latest_twse_stock_info():
 
 # 下載最新otc公司資訊為csv檔
 def download_latest_otc_stock_info():
-    global otc_info_file
     try:
         header = data_fetch.config.HEADER
         html = requests.get(data_fetch.config.OTC_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
@@ -198,7 +195,6 @@ def get_stock_info_from_temp(file_type='all', return_dict=False):
 
 
 def get_all_stock_info_from_db():
-    global stock_info_columns
     table_name = database.config.STOCK_INFO_TABLE
     table_columns = stock_info_columns
     table_columns[2] = 'CAST(date AS CHAR) AS date'
@@ -224,7 +220,6 @@ def get_all_stock_price_by_a_day_from_url(date='2000-01-01'):
 
 #
 def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_dict=False):
-    global stock_price_columns
     select_columns = stock_price_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
     columns_str = ', '.join(select_columns)
@@ -343,7 +338,6 @@ def update_all_stock_price_a_day_to_db(date='2000-01-01'):
 
 
 def save_all_stock_price_a_day_to_db(data=None):
-    global stock_price_columns
     inserted_row = 0
     if data:
         table_name = database.config.STOCK_PRICE_TABLE

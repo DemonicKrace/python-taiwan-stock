@@ -189,8 +189,6 @@ def get_balance_sheet_of_a_season_from_temp(stock_no='2330', year=2019, season=1
 
 
 def get_balance_sheet_of_a_season_from_url(stock_no='2330', year=2019, season=1):
-    global dict_format
-    global except_percent_columns
     stockno_year_season = "{}-{}-{}".format(stock_no, year, season)
     try:
         query_year = year
