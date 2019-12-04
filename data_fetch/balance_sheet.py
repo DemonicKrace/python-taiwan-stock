@@ -315,7 +315,7 @@ def get_balance_sheet_of_a_season(stock_no='2330', year=2019, season=1):
             result = get_balance_sheet_of_a_season_from_url(stock_no, year, season)
             if result and data_fetch.config.AUTO_SAVE_TO_DB:
                 save_balance_sheet_of_a_season_to_db(result)
-            lib.tool.delay_seconds()
+            lib.tool.delay_short_seconds()
         if result and data_fetch.config.AUTO_SAVE_TO_TEMP:
             save_balance_sheet_of_a_season_to_temp(result)
     return result

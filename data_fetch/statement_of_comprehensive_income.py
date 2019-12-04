@@ -279,19 +279,19 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if not s1_data:
         s1_data = get_income_statement_from_url(stock_no, year, 1)
-        lib.tool.delay_seconds()
+        lib.tool.delay_sh()
 
     if not s2_data:
         s2_data = get_income_statement_from_url(stock_no, year, 2)
-        lib.tool.delay_seconds()
+        lib.tool.delay_sh()
 
     if not s3_data:
         s3_data = get_income_statement_from_url(stock_no, year, 3)
-        lib.tool.delay_seconds()
+        lib.tool.delay_sh()
 
     if not year_data:
         year_data = get_income_statement_from_url(stock_no, year, 4)
-        lib.tool.delay_seconds()
+        lib.tool.delay_sh()
 
     if s1_data and s2_data and s3_data and year_data:
         s4_data = {
@@ -383,7 +383,7 @@ def get_income_statement_of_a_season(stock_no='2330', year=2019, season=1):
             result = get_income_statement_of_a_season_from_url(stock_no, year, season)
             if result and data_fetch.config.AUTO_SAVE_TO_DB:
                 save_income_statement_of_a_season_to_db(result)
-            lib.tool.delay_seconds()
+            lib.tool.delay_sh()
         if result and data_fetch.config.AUTO_SAVE_TO_TEMP:
             save_income_statement_of_a_season_to_temp(result)
     return result
@@ -428,7 +428,7 @@ if __name__ == "__main__":
     #     s = d[1]
     #     r = get_income_statement_of_a_season('2330', y, s)
     #     pp.pprint(r)
-    #     lib.tool.delay_seconds()()
+    #     lib.tool.delay_short_seconds()
     # r = get_income_statement_from_url('2330', 2018, 4)
     # pp.pprint(r)
 
