@@ -4,7 +4,6 @@ Created on 2019/11/6 15:14
 
 @author: demonickrace
 """
-import time
 import lib.tool
 import data_fetch.config
 import data_fetch.month_revenue
@@ -14,6 +13,11 @@ import data_fetch.stock
 import database.mysql_manager
 
 db_manager = database.mysql_manager.MysqlManager()
+
+except_business_type = [
+    '金融保險業',
+    '建材營造業'
+]
 
 
 # 更新上市櫃公司之資訊到資料庫
@@ -64,19 +68,28 @@ def update_balance_sheet_by_a_season(stock_no=None, year=None, season=None):
 
 # 更新全部上市櫃財報
 def update_all_fs_by_seasons(dates=None):
+    global except_business_type
     print('update_all_fs_by_seasons start...\n')
     if not dates:
         dates = []
     if dates:
         all_company_info = data_fetch.stock.get_all_stock_info()
+        all_company_count = len(all_company_info)
         for date in dates:
             year = date[0]
             season = date[1]
             print('update_all_fs_by_seasons start, year = {}, season = {}\n'.format(year, season))
+            i = 0
             for stock_info in all_company_info:
+                i += 1
                 stock_no = stock_info[0]
                 stock_name = stock_info[1]
-                print('stock_no = {} ({})'.format(stock_no, stock_name))
+                business_type = stock_info[3]
+                print('now={}/{}, ({}/{})'.format(year, season, i, all_company_count))
+                print('stock_no = {} ({}, {})'.format(stock_no, stock_name, business_type))
+                if business_type in except_business_type:
+                    print('this business type would not process...')
+                    continue
                 # balance not contain season 5 (year)
                 if 5 != season:
                     # update balance sheet
