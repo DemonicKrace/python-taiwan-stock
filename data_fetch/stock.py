@@ -228,19 +228,30 @@ def get_all_stock_price_by_a_day_from_url(date='2000-01-01'):
 
 
 #
-def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_dict=False):
+def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_type='array'):
     select_columns = stock_price_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
     columns_str = ', '.join(select_columns)
     table_name = database.config.STOCK_PRICE_TABLE
     sql = "SELECT {} FROM {} WHERE date='{}';".format(columns_str, table_name, date)
-    result = db_manager.select_query(sql, return_dict)
+    result = db_manager.select_query(sql, return_dict=False)
     if result:
-        if return_dict:
-            return lib.tool.byteify(result)
-        else:
-            return [list(row) for row in result]
-    return None
+        if 'array' == return_type:
+            result = [list(row) for row in result]
+        elif 'dict' == return_type:
+            result = {
+                row[1] + "-" + row[0]: {
+                    stock_price_columns[2]: row[2],
+                    stock_price_columns[3]: row[3],
+                    stock_price_columns[4]: row[4],
+                    stock_price_columns[5]: row[5],
+                    stock_price_columns[6]: row[6],
+                    stock_price_columns[7]: row[7],
+                    stock_price_columns[8]: row[8],
+                    stock_price_columns[9]: row[9]
+                } for row in result
+            }
+    return result
 
 
 # 取得該日期的全部上市股價資料
@@ -406,7 +417,7 @@ if __name__ == '__main__':
     # pp.pprint(r)
 
     # # test get_all_stock_price_by_a_day_from_db
-    # r = get_all_stock_price_by_a_day_from_db('2019-11-04', return_dict=True)
+    # r = get_all_stock_price_by_a_day_from_db('2019-11-04', return_type='dict')
     # pp.pprint(r)
     # print(len(r))
 
