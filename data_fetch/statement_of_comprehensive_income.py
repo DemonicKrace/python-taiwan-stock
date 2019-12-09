@@ -356,12 +356,16 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if data_fetch.config.AUTO_SAVE_TO_DB:
         if s1_data:
+            print('stock_no = {}, year = {}, season = 1'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s1_data)
         if s2_data:
+            print('stock_no = {}, year = {}, season = 2'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s2_data)
         if s3_data:
+            print('stock_no = {}, year = {}, season = 3'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s3_data)
         if year_data:
+            print('stock_no = {}, year = {}, season = 5'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(year_data)
 
     return s4_data
