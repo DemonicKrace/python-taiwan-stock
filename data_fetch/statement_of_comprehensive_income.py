@@ -18,8 +18,12 @@ db_manager = database.mysql_manager.MysqlManager()
 # 綜合損益 statement_of_comprehensive_income
 # 爬取的欄位
 dict_format = {
+    ##
     "營業收入合計": "operating_revenue",
+    "收入合計": "operating_revenue",
+    ##
     "營業成本合計": "operating_costs",
+    "支出合計": "operating_costs",
     "營業毛利(毛損)": "gross_profit_loss_from_operations",
     "未實現銷貨(損)益": "unrealized_profit_loss_from_sales",
     "已實現銷貨(損)益": "realized_profit_loss_on_from_sales",
@@ -338,20 +342,28 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
                 s4_data[percent_key] = ''
             else:
                 s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
+        s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
 
-        if data_fetch.config.AUTO_SAVE_TO_TEMP:
+    if data_fetch.config.AUTO_SAVE_TO_TEMP:
+        if s1_data:
             save_income_statement_of_a_season_to_temp(s1_data)
+        if s2_data:
             save_income_statement_of_a_season_to_temp(s2_data)
+        if s3_data:
             save_income_statement_of_a_season_to_temp(s3_data)
+        if year_data:
             save_income_statement_of_a_season_to_temp(year_data)
 
-        if data_fetch.config.AUTO_SAVE_TO_DB:
+    if data_fetch.config.AUTO_SAVE_TO_DB:
+        if s1_data:
             save_income_statement_of_a_season_to_db(s1_data)
+        if s2_data:
             save_income_statement_of_a_season_to_db(s2_data)
+        if s3_data:
             save_income_statement_of_a_season_to_db(s3_data)
+        if year_data:
             save_income_statement_of_a_season_to_db(year_data)
 
-        s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
     return s4_data
 
 
@@ -438,6 +450,10 @@ if __name__ == "__main__":
 
     # # test bank
     # r = get_income_statement_of_a_season_from_url('2891', 2019, 1)
+    # pp.pprint(r)
+
+    # # test 2207 with "收入合計" column
+    # r = get_income_statement_of_a_season_from_url('2207', 2018, 4)
     # pp.pprint(r)
 
     pass
