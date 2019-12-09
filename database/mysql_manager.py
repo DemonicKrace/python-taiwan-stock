@@ -90,48 +90,36 @@ class MysqlManager:
     def insert_rows(self, columns=None, rows=None, table=None):
         affected_count = 0
         con = self.get_connection_obj()
-        if not con:
-            return affected_count
-        try:
-            columns_str = ', '.join(columns)
-            values_str = ', '.join(['%s' for i in columns])
-            sql_insert = "INSERT INTO {} ({}) VALUES ({});".format(table, columns_str, values_str)
-            cursor = con.cursor()
-            affected_count = cursor.executemany(sql_insert, rows)
-            con.commit()
-            print("table:'{}' inserted {} rows".format(table, affected_count))
-        except Exception as e:
-            msg = "table:'{}' insert failed! ,error = {}\n".format(table, e.args)
-            print(msg)
-            self.write_error_log(msg)
-        finally:
-            con.close()
+        if con:
+            try:
+                columns_str = ', '.join(columns)
+                values_str = ', '.join(['%s' for i in columns])
+                sql_insert = "INSERT INTO {} ({}) VALUES ({});".format(table, columns_str, values_str)
+                cursor = con.cursor()
+                affected_count = cursor.executemany(sql_insert, rows)
+                con.commit()
+                print("table:'{}' inserted {} rows".format(table, affected_count))
+            except Exception as e:
+                msg = "table:'{}' insert failed! ,error = {}\n".format(table, e.args)
+                print(msg)
+                self.write_error_log(msg)
+            finally:
+                con.close()
         return affected_count
 
     def get_connection_obj(self):
+        con = None
         try:
             con = pymysql.connect(self.host, self.user, self.pw, self.db, self.port)
-            return con
         except Exception as e:
             print("database connect fail..., msg={}".format(e.args))
-            return None
+        return con
 
     @staticmethod
     def write_error_log(msg):
         from data_fetch.log import Log
         log = Log()
         log.write_db_err_log(msg)
-
-    # 檢查與測試資料
-    @staticmethod
-    def show_data(data):
-        if data is None:
-            print ("data is empty!")
-            return
-        print("----------")
-        for i, row in enumerate(data, 1):
-            print(i, row)
-        print("----------")
 
 
 if __name__ == '__main__':
