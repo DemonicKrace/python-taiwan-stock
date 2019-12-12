@@ -255,6 +255,7 @@ def get_balance_sheet_of_a_season_from_url(stock_no='2330', year=2019, season=1)
         if u"查無所需資料！" == h4:
             msg = "website find no data for the season!"
             print(msg)
+            # TODO: save no fs date to temp
             raise Exception(msg)
 
         table = soup.find("table", "hasBorder")

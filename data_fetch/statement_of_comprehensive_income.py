@@ -134,9 +134,9 @@ def save_income_statement_of_a_season_to_temp(data=None):
 
 
 def get_income_statement_of_a_season_from_temp(stock_no='2330', year=2019, season=1):
+    date = '{}-{}'.format(year, season)
+    key = '{}-{}'.format(stock_no, date)
     try:
-        date = '{}-{}'.format(year, season)
-        key = '{}-{}'.format(stock_no, date)
         target_file = data_fetch.config.FS_STATEMENT_OF_COMPREHENSIVE_INCOME_PATH + '/{}.json'.format(date)
 
         lib.tool.init_json_file_if_not_exist(target_file)
@@ -219,6 +219,7 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
         if u"查無所需資料！" == h4:
             msg = "website find no data for the season!"
             print(msg)
+            # TODO: save no fs date to temp
             raise Exception(msg)
 
         table = soup.find("table", "hasBorder")

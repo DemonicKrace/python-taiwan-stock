@@ -151,6 +151,12 @@ def get_company_list(source_type='newest_publish', year=None, season=None):
     return company_list
 
 
+# 取得市場交易日期列表
+def get_market_open_date_list(start_date='2010-01-01'):
+    # TODO: get market open date list
+    pass
+
+
 if __name__ == "__main__":
     import pprint as pp
 
