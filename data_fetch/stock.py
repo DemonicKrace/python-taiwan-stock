@@ -72,7 +72,8 @@ def update_latest_all_stock_info_to_db_and_temp():
 def download_latest_twse_stock_info():
     try:
         header = data_fetch.config.HEADER
-        html = requests.get(data_fetch.config.TWSE_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
+        html = requests.get(data_fetch.config.TWSE_STOCK_INFO_URL, headers=header,
+                            timeout=data_fetch.config.TIMEOUT_SECONDS)
         soup = BeautifulSoup(html.text, "html.parser")
         table = soup.find("table", attrs={"class": "h4"})
         rows = []
@@ -106,7 +107,8 @@ def download_latest_twse_stock_info():
 def download_latest_otc_stock_info():
     try:
         header = data_fetch.config.HEADER
-        html = requests.get(data_fetch.config.OTC_STOCK_INFO_URL, headers=header, timeout=data_fetch.config.TIMEOUT_SECONDS)
+        html = requests.get(data_fetch.config.OTC_STOCK_INFO_URL, headers=header,
+                            timeout=data_fetch.config.TIMEOUT_SECONDS)
         soup = BeautifulSoup(html.text, "html.parser")
         table = soup.find("table", attrs={"class": "h4"})
 
@@ -227,7 +229,25 @@ def get_all_stock_price_by_a_day_from_url(date='2000-01-01'):
     return get_all_twse_stock_price_by_a_day_from_url(date) + get_all_otc_stock_price_by_a_day_from_url(date)
 
 
-#
+"""
+get_all_stock_price_by_a_day_from_db
+
+:return
+
+{
+'2019-12-04-2330': {'bid_ask_spread': '-1.00',
+                     'close': 306.0,
+                     'deal': 9989,
+                     'high': 306.0,
+                     'low': 304.0,
+                     'open': 305.0,
+                     'shares': 34911686,
+                     'turnover': 10652239802}, ...
+}
+"""
+
+
+# 從資料庫取得該日全部股價資料
 def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_type='array'):
     select_columns = stock_price_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
@@ -422,4 +442,3 @@ if __name__ == '__main__':
     # print(len(r))
 
     pass
-
