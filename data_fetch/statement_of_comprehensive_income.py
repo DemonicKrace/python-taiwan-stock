@@ -377,8 +377,8 @@ def get_income_statement_of_a_season_from_url(stock_no='2330', year=2019, season
 
 
 def get_income_statement_of_a_season_from_db(stock_no='2330', year=2019, season=1):
-    table = database.config.INCOME_STATEMENT_TABLE
-    sql = "SELECT * FROM {} WHERE stock_no='{}' and year='{}' and season='{}';".format(table, stock_no, year, season)
+    table_name = database.config.INCOME_STATEMENT_TABLE
+    sql = "SELECT * FROM {} WHERE stock_no='{}' and year='{}' and season='{}';".format(table_name, stock_no, year, season)
     result = db_manager.select_query(sql, return_dict=True)
     if result:
         return lib.tool.byteify(result[0])
@@ -397,6 +397,101 @@ def get_income_statement_of_a_season(stock_no='2330', year=2019, season=1):
         if result and data_fetch.config.AUTO_SAVE_TO_TEMP:
             save_income_statement_of_a_season_to_temp(result)
     return result
+
+
+def get_income_statement_table_column_names():
+    sql = """
+        SELECT COLUMN_NAME
+        FROM INFORMATION_SCHEMA.COLUMNS
+        WHERE TABLE_NAME = N'{}'
+    """.format(database.config.INCOME_STATEMENT_TABLE)
+    result = db_manager.select_query(sql)
+    if result:
+        result = [row[0] for row in result]
+    else:
+        result = []
+    return result
+
+
+def get_income_statement_of_a_recent_year(stock_no='2330', year=2019, season=1):
+    dates = []
+    now_year = year
+    now_season = season
+    i = 4
+    while i > 0:
+        i -= 1
+        dates.append([
+            now_year,
+            now_season
+        ])
+        if 1 < now_season:
+            now_season -= 1
+        else:
+            now_year -= 1
+            now_season = 4
+
+    s4_data = get_income_statement_of_a_season(stock_no, dates[0][0], dates[0][1])
+    s3_data = get_income_statement_of_a_season(stock_no, dates[1][0], dates[1][1])
+    s2_data = get_income_statement_of_a_season(stock_no, dates[2][0], dates[2][1])
+    s1_data = get_income_statement_of_a_season(stock_no, dates[3][0], dates[3][1])
+    recent_year_revenue = None
+    if s1_data and s2_data and s3_data and s4_data:
+        if '' != s1_data['operating_revenue'] \
+                and '' != s2_data['operating_revenue'] \
+                and '' != s3_data['operating_revenue'] \
+                and '' != s4_data['operating_revenue']:
+            recent_year_revenue = s1_data['operating_revenue'] \
+                                  + s2_data['operating_revenue'] \
+                                  + s3_data['operating_revenue'] \
+                                  + s4_data['operating_revenue']
+
+        recent_year_data = {
+            "stock_no": stock_no,
+            "first_year_season": "{}-{}".format(dates[3][0], dates[3][1]),
+            "last_year_season": "{}-{}".format(dates[0][0], dates[0][1]),
+        }
+        if recent_year_revenue:
+            recent_year_data['operating_revenue'] = recent_year_revenue
+            recent_year_data['operating_revenue_p'] = 1.0
+        else:
+            recent_year_data['operating_revenue'] = ''
+            recent_year_data['operating_revenue_p'] = ''
+
+        column_names = get_income_statement_table_column_names()
+        for column_name in column_names:
+            index = len(column_name) - 2
+            if '_p' == column_name[index:] \
+                    or 'stock_no' == column_name \
+                    or 'year' == column_name \
+                    or 'season' == column_name:
+                continue
+
+            if '' != s1_data[column_name] \
+                    and '' != s2_data[column_name] \
+                    and '' != s3_data[column_name] \
+                    and '' != s4_data[column_name]:
+                recent_year_data[column_name] = s1_data[column_name] \
+                                                + s2_data[column_name] \
+                                                + s3_data[column_name] \
+                                                + s4_data[column_name]
+            else:
+                recent_year_data[column_name] = ''
+
+            if column_name not in except_percent_columns:
+                percent_key = column_name + '_p'
+                if '' == recent_year_data[column_name]:
+                    recent_year_data[percent_key] = ''
+                elif recent_year_revenue is not None:
+                    if 0 != recent_year_revenue:
+                        recent_year_data[percent_key] = float(
+                            float(recent_year_data[column_name]) / float(recent_year_revenue)
+                        )
+                    else:
+                        recent_year_data[percent_key] = 0
+    else:
+        recent_year_data = None
+
+    return recent_year_data
 
 
 if __name__ == "__main__":
@@ -458,4 +553,14 @@ if __name__ == "__main__":
     # r = get_income_statement_of_a_season_from_url('6541', 2018, 4)
     # pp.pprint(r)
 
+    # # test get_income_statement_table_column_names
+    # r = get_income_statement_table_column_names()
+    # pp.pprint(r)
+
+    # # test get_income_statement_of_a_recent_year
+    # r = get_income_statement_of_a_recent_year('2330', 2019, 1)
+    # pp.pprint(r)
+
     pass
+
+
