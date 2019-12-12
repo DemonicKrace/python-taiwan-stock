@@ -14,7 +14,12 @@ from bs4 import BeautifulSoup
 
 db_manager = database.mysql_manager.MysqlManager()
 
-company_type = [
+special_input_param_company_list = [
+    # 中租-KY
+    '5871'
+]
+
+company_type_list = [
     "上櫃公司",
     "上市公司"
 ]
@@ -22,7 +27,6 @@ company_type = [
 
 # 取得公開觀測站當天最新公布財報的公司代號
 def get_newest_company_report_info():
-    global company_type
     print('get_newest_company_report_info start...')
     url = data_fetch.config.NEWEST_REPORT_INFO_URL
     header = data_fetch.config.HEADER
@@ -37,7 +41,7 @@ def get_newest_company_report_info():
             msg = b.find("u").text
             print(msg)
             save_text += msg.encode('utf8') + "\n"
-            match_company_no = match_process(msg.encode('utf8'), company_type)
+            match_company_no = match_process(msg.encode('utf8'), company_type_list)
             if match_company_no:
                 match_company_set.add(match_company_no)
         create_newest_company_report_info_temp(save_text, datetime.datetime.today().strftime('%Y-%m-%d_%H-%M-%S') + '.txt')
@@ -93,7 +97,6 @@ def match_process(msg_str, match_list):
 
 # 從暫存檔取得公司代號資訊
 def get_stockno_from_temp(filename):
-    global company_type
     print('get_stockno_from_temp start...')
     filename = data_fetch.config.NEWEST_REPORT_INFO_SAVE_PATH + '/' + filename
     print('temp = {}'.format(filename))
@@ -104,7 +107,7 @@ def get_stockno_from_temp(filename):
     match_company_set = set()
     for row in content:
         print(row)
-        match_company_no = match_process(row, company_type)
+        match_company_no = match_process(row, company_type_list)
         if match_company_no:
             match_company_set.add(match_company_no)
     data = list(match_company_set)
