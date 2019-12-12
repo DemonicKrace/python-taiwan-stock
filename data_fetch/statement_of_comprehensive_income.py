@@ -81,15 +81,7 @@ def update_income_statement_of_a_season_to_db(stock_no='2330', year=2019, season
     else:
         return_data = get_income_statement_of_a_season_from_url(stock_no, year, season)
         if return_data:
-            table_columns = []
-            row = []
-            for key, value in return_data.items():
-                if '' != value:
-                    table_columns.append(key)
-                    row.append(value)
-            rows = [row]
-            table_name = database.config.INCOME_STATEMENT_TABLE
-            inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
+            inserted_rows = save_income_statement_of_a_season_to_db(return_data)
         lib.tool.delay_short_seconds()
     return inserted_rows
 
@@ -108,6 +100,7 @@ def save_income_statement_of_a_season_to_db(data=None):
                 table_columns.append(key)
                 values.append(value)
         if not is_income_statement_exist_in_db(stock_no, year, season) and values:
+            print('stock_no = {}, year = {}, season = {}, try to inserting...'.format(stock_no, year, season))
             rows = [values]
             table_name = database.config.INCOME_STATEMENT_TABLE
             inserted_rows = db_manager.insert_rows(table_columns, rows, table_name)
@@ -362,16 +355,12 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if data_fetch.config.AUTO_SAVE_TO_DB:
         if s1_data:
-            print('stock_no = {}, year = {}, season = 1'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s1_data)
         if s2_data:
-            print('stock_no = {}, year = {}, season = 2'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s2_data)
         if s3_data:
-            print('stock_no = {}, year = {}, season = 3'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(s3_data)
         if year_data:
-            print('stock_no = {}, year = {}, season = 5'.format(stock_no, year))
             save_income_statement_of_a_season_to_db(year_data)
 
     return s4_data
