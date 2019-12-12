@@ -83,7 +83,7 @@ def update_income_statement_of_a_season_to_db(stock_no='2330', year=2019, season
         if return_data:
             table_columns = []
             row = []
-            for key, value in return_data.iteritems():
+            for key, value in return_data.items():
                 if '' != value:
                     table_columns.append(key)
                     row.append(value)
@@ -103,7 +103,7 @@ def save_income_statement_of_a_season_to_db(data=None):
     if data and stock_no and year and season:
         table_columns = []
         values = []
-        for key, value in data.iteritems():
+        for key, value in data.items():
             if '' != value:
                 table_columns.append(key)
                 values.append(value)
@@ -325,7 +325,10 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
                 s4_data[key] = year_value - s1_value - s2_value - s3_value
 
         s4_operating_revenue = s4_data['operating_revenue']
-        s4_data['operating_revenue_p'] = 1.0
+        if 0 == float(s4_operating_revenue):
+            s4_data['operating_revenue_p'] = 0.0
+        else:
+            s4_data['operating_revenue_p'] = 1.0
         # calculate percent
         for key, value in s4_data.items():
             # columns with not need percent
@@ -341,7 +344,10 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
             if '' == value:
                 s4_data[percent_key] = ''
             else:
-                s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
+                if 0 == float(s4_operating_revenue):
+                    s4_data[percent_key] = 0.0
+                else:
+                    s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
         s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
 
     if data_fetch.config.AUTO_SAVE_TO_TEMP:
@@ -458,6 +464,10 @@ if __name__ == "__main__":
 
     # # test 2207 with "收入合計" column
     # r = get_income_statement_of_a_season_from_url('2207', 2018, 4)
+    # pp.pprint(r)
+
+    # # test 6541 with "收入合計" column
+    # r = get_income_statement_of_a_season_from_url('6541', 2018, 4)
     # pp.pprint(r)
 
     pass

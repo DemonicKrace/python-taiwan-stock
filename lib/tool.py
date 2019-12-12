@@ -25,7 +25,7 @@ def json_loads_byteified(json_text):
 
 def byteify(input_data):
     if isinstance(input_data, dict):
-        return {byteify(key): byteify(value) for key, value in input_data.iteritems()}
+        return {byteify(key): byteify(value) for key, value in input_data.items()}
     elif isinstance(input_data, list):
         return [byteify(element) for element in input_data]
     elif isinstance(input_data, unicode):

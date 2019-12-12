@@ -112,7 +112,7 @@ def update_balance_sheet_of_a_season_to_db(stock_no='2330', year=2019, season=1)
         if return_data:
             table_columns = []
             row = []
-            for key, value in return_data.iteritems():
+            for key, value in return_data.items():
                 if '' != value:
                     table_columns.append(key)
                     row.append(value)
@@ -132,7 +132,7 @@ def save_balance_sheet_of_a_season_to_db(data=None):
     if data and stock_no and year and season:
         table_columns = []
         values = []
-        for key, value in data.iteritems():
+        for key, value in data.items():
             if '' != value:
                 table_columns.append(key)
                 values.append(value)
