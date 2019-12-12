@@ -48,6 +48,8 @@ TWSE_INFO_FILENAME = 'twse_info_list.csv'
 # 上櫃證卷資訊csv暫存檔案檔名
 OTC_INFO_FILENAME = 'otc_info_list.csv'
 
+# 公司無財報之日期列表
+NO_FS_DATE_LIST_FILENAME = 'no_fs_date_list.json'
 
 """
 directory path
@@ -72,6 +74,9 @@ STOCK_INFO_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/stock_info'
 
 # 股價暫存檔案路徑
 STOCK_PRICE_SAVE_PATH = FINANCIAL_STATEMENT_PATH + '/stock_price'
+
+# 其他類型
+OTHER_PATH = FINANCIAL_STATEMENT_PATH + '/other'
 
 """
 url

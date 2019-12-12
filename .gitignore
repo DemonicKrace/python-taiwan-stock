@@ -18,6 +18,7 @@ data_fetch/financial_statement/month_revenue/*
 data_fetch/financial_statement/newest_publish_info_temp/*
 data_fetch/financial_statement/stock_price/*
 data_fetch/financial_statement/stock_info/*
+data_fetch/financial_statement/other/*
 database/db_err_log.txt
 test.py
 task_list.txt
