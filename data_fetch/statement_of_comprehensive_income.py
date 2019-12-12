@@ -276,18 +276,38 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
 
     if not s1_data:
         s1_data = get_income_statement_from_url(stock_no, year, 1)
+        if s1_data:
+            if data_fetch.config.AUTO_SAVE_TO_DB:
+                save_income_statement_of_a_season_to_db(s1_data)
+            if data_fetch.config.AUTO_SAVE_TO_TEMP:
+                save_income_statement_of_a_season_to_temp(s1_data)
         lib.tool.delay_short_seconds()
 
     if not s2_data:
         s2_data = get_income_statement_from_url(stock_no, year, 2)
+        if s2_data:
+            if data_fetch.config.AUTO_SAVE_TO_DB:
+                save_income_statement_of_a_season_to_db(s2_data)
+            if data_fetch.config.AUTO_SAVE_TO_TEMP:
+                save_income_statement_of_a_season_to_temp(s2_data)
         lib.tool.delay_short_seconds()
 
     if not s3_data:
         s3_data = get_income_statement_from_url(stock_no, year, 3)
+        if s3_data:
+            if data_fetch.config.AUTO_SAVE_TO_DB:
+                save_income_statement_of_a_season_to_db(s3_data)
+            if data_fetch.config.AUTO_SAVE_TO_TEMP:
+                save_income_statement_of_a_season_to_temp(s3_data)
         lib.tool.delay_short_seconds()
 
     if not year_data:
         year_data = get_income_statement_from_url(stock_no, year, 4)
+        if year_data:
+            if data_fetch.config.AUTO_SAVE_TO_DB:
+                save_income_statement_of_a_season_to_db(year_data)
+            if data_fetch.config.AUTO_SAVE_TO_TEMP:
+                save_income_statement_of_a_season_to_temp(year_data)
         lib.tool.delay_short_seconds()
 
     if s1_data and s2_data and s3_data and year_data:
@@ -342,27 +362,6 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
                 else:
                     s4_data[percent_key] = round(float(value) / float(s4_operating_revenue), 4)
         s4_data = lib.tool.fill_default_value_if_column_not_exist(dict_format, s4_data, except_percent_columns)
-
-    if data_fetch.config.AUTO_SAVE_TO_TEMP:
-        if s1_data:
-            save_income_statement_of_a_season_to_temp(s1_data)
-        if s2_data:
-            save_income_statement_of_a_season_to_temp(s2_data)
-        if s3_data:
-            save_income_statement_of_a_season_to_temp(s3_data)
-        if year_data:
-            save_income_statement_of_a_season_to_temp(year_data)
-
-    if data_fetch.config.AUTO_SAVE_TO_DB:
-        if s1_data:
-            save_income_statement_of_a_season_to_db(s1_data)
-        if s2_data:
-            save_income_statement_of_a_season_to_db(s2_data)
-        if s3_data:
-            save_income_statement_of_a_season_to_db(s3_data)
-        if year_data:
-            save_income_statement_of_a_season_to_db(year_data)
-
     return s4_data
 
 
