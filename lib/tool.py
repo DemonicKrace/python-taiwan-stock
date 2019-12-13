@@ -83,6 +83,15 @@ def fill_default_value_if_column_not_exist(format_data=None, data=None, except_p
     return data
 
 
+# check data is empty string or None
+def is_empty_string_or_none(value=None):
+    if value is '':
+        return True
+    if value is None:
+        return True
+    return False
+
+
 def delay_seconds(min_wait_seconds=config.MIN_WAIT_SECONDS, max_wait_seconds=config.MAX_WAIT_SECONDS):
     seconds = random.randint(min_wait_seconds, max_wait_seconds)
     print('wait {} seconds...'.format(seconds))
@@ -98,5 +107,4 @@ def delay_short_seconds():
 
 
 if __name__ == '__main__':
-
     pass
