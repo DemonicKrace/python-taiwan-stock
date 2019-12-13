@@ -257,7 +257,12 @@ def get_income_statement_from_url(stock_no='2330', year=2019, season=1):
                     dict_data[key] = int(row[1]) * 1000
             if '' != row[2] and key_p:
                 dict_data[key_p] = float(row[2]) / 100.0
-    
+
+    # init necessary column
+    if dict_data.get('operating_revenue', None) is None:
+        dict_data['operating_revenue'] = 0
+        dict_data['operating_revenue_p'] = 0
+
     # 公開觀測站只有第一二三季報表,第四季為年度報表
     if 4 == season:
         season = 5
@@ -338,7 +343,12 @@ def get_income_statement_of_a_season4(stock_no='2330', year=2018):
             else:
                 s4_data[key] = year_value - s1_value - s2_value - s3_value
 
-        s4_operating_revenue = s4_data['operating_revenue']
+        if '' == s4_data['operating_revenue']:
+            s4_data['operating_revenue'] = 0
+            s4_operating_revenue = 0
+        else:
+            s4_operating_revenue = s4_data['operating_revenue']
+
         if 0 == float(s4_operating_revenue):
             s4_data['operating_revenue_p'] = 0.0
         else:
@@ -540,6 +550,10 @@ if __name__ == "__main__":
 
     # # test update_income_statement_of_a_season_to_db
     # r = update_income_statement_of_a_season_to_db('2330', 2018, 4)
+    # pp.pprint(r)
+
+    # # test update_income_statement_of_a_season_to_db
+    # r = update_income_statement_of_a_season_to_db('6497', 2018, 4)
     # pp.pprint(r)
 
     # # test bank
