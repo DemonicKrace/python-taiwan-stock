@@ -119,6 +119,11 @@ def save_income_statement_of_a_season_to_temp(data=None):
         lib.tool.init_json_file_if_not_exist(target_file)
         json_obj = lib.tool.get_json_obj_from_temp_file(target_file)
 
+        # convert None to empty string
+        for key in data.keys():
+            if data[key] is None:
+                data[key] = ''
+
         # check data exist
         with open(target_file, 'w') as temp_file:
             json_obj[key] = data
@@ -447,10 +452,10 @@ def get_income_statement_of_a_recent_year(stock_no='2330', year=2019, season=1):
     s1_data = get_income_statement_of_a_season(stock_no, dates[3][0], dates[3][1])
     recent_year_revenue = None
     if s1_data and s2_data and s3_data and s4_data:
-        if '' != s1_data['operating_revenue'] \
-                and '' != s2_data['operating_revenue'] \
-                and '' != s3_data['operating_revenue'] \
-                and '' != s4_data['operating_revenue']:
+        if not lib.tool.is_empty_string_or_none(s1_data['operating_revenue']) \
+                and not lib.tool.is_empty_string_or_none(s2_data['operating_revenue']) \
+                and not lib.tool.is_empty_string_or_none(s3_data['operating_revenue']) \
+                and not lib.tool.is_empty_string_or_none(s4_data['operating_revenue']):
             recent_year_revenue = s1_data['operating_revenue'] \
                                   + s2_data['operating_revenue'] \
                                   + s3_data['operating_revenue'] \
@@ -477,10 +482,10 @@ def get_income_statement_of_a_recent_year(stock_no='2330', year=2019, season=1):
                     or 'season' == column_name:
                 continue
 
-            if '' != s1_data[column_name] \
-                    and '' != s2_data[column_name] \
-                    and '' != s3_data[column_name] \
-                    and '' != s4_data[column_name]:
+            if not lib.tool.is_empty_string_or_none(s1_data[column_name]) \
+                    and not lib.tool.is_empty_string_or_none(s2_data[column_name]) \
+                    and not lib.tool.is_empty_string_or_none(s3_data[column_name]) \
+                    and not lib.tool.is_empty_string_or_none(s4_data[column_name]):
                 recent_year_data[column_name] = s1_data[column_name] \
                                                 + s2_data[column_name] \
                                                 + s3_data[column_name] \
