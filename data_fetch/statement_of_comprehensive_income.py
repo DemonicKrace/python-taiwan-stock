@@ -463,8 +463,8 @@ def get_income_statement_of_a_recent_year(stock_no='2330', year=2019, season=1):
 
         recent_year_data = {
             "stock_no": stock_no,
-            "first_year_season": "{}-{}".format(dates[3][0], dates[3][1]),
-            "last_year_season": "{}-{}".format(dates[0][0], dates[0][1]),
+            "is_first_year_season": "{}-{}".format(dates[3][0], dates[3][1]),
+            "is_last_year_season": "{}-{}".format(dates[0][0], dates[0][1]),
         }
         if recent_year_revenue:
             recent_year_data['operating_revenue'] = recent_year_revenue
@@ -582,5 +582,3 @@ if __name__ == "__main__":
     # pp.pprint(r)
 
     pass
-
-

@@ -229,25 +229,21 @@ def get_all_stock_price_by_a_day_from_url(date='2000-01-01'):
     return get_all_twse_stock_price_by_a_day_from_url(date) + get_all_otc_stock_price_by_a_day_from_url(date)
 
 
-"""
-get_all_stock_price_by_a_day_from_db
-
-:return
-
-{
-'2019-12-04-2330': {'bid_ask_spread': '-1.00',
-                     'close': 306.0,
-                     'deal': 9989,
-                     'high': 306.0,
-                     'low': 304.0,
-                     'open': 305.0,
-                     'shares': 34911686,
-                     'turnover': 10652239802}, ...
-}
-"""
-
-
 # 從資料庫取得該日全部股價資料
+# get_all_stock_price_by_a_day_from_db
+#
+# :return
+#
+# {
+# '2019-12-04-2330': {'bid_ask_spread': '-1.00',
+#                      'close': 306.0,
+#                      'deal': 9989,
+#                      'high': 306.0,
+#                      'low': 304.0,
+#                      'open': 305.0,
+#                      'shares': 34911686,
+#                      'turnover': 10652239802}, ...
+# }
 def get_all_stock_price_by_a_day_from_db(date='2000-01-01', return_type='array'):
     select_columns = stock_price_columns
     select_columns[1] = 'CAST(date AS CHAR) AS date'
